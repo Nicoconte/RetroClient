@@ -1,0 +1,90 @@
+﻿<div class="@SidebarCssClass">
+    <div class="sidebar-burguer-button-container">
+        <button @onclick="ToggleSidebar" class='btn btn-lg'>
+            <i class='fa fa-bars'></i>
+        </button>
+    </div>
+    <div class="sidebar-content-container">
+        
+        <a href='/' class="btn sidebar-button-container">
+            <div class="@SidebarIconCssClass">
+                <i class='fa fa-home'></i>
+            </div>
+            <div class="@SidebarTextCssClass">
+                <span>Home</span>
+            </div>            
+        </a>
+
+        <a href='/games' class="btn sidebar-button-container">
+            <div class="@SidebarIconCssClass">
+                <i class='fa fa-gamepad'></i>
+            </div>
+            <div class="@SidebarTextCssClass">
+                <span>Games</span>
+            </div>            
+        </a>
+
+
+        <a class="btn sidebar-button-container">
+            <div class="@SidebarIconCssClass">
+                <i class='fa fa-connectdevelop'></i>
+            </div>
+            <div class="@SidebarTextCssClass">
+                <span>RetroArch</span>
+            </div>            
+        </a>
+
+        <a class="btn sidebar-button-container">
+            <div class="@SidebarIconCssClass">
+                <i class='fa fa-cogs'></i>
+            </div>
+            <div class="@SidebarTextCssClass">
+                <span>Settings</span>
+            </div>            
+        </a>
+
+        <button class="btn sidebar-exit-button-container">
+            <div class="@SidebarIconCssClass">
+                <i class='fa fa-sign-out'></i>
+            </div>
+            <div class="@SidebarTextCssClass">
+                <span>Exit</span>
+            </div>            
+        </button>        
+
+    </div>
+</div>
+
+@code {    
+    public bool IsOpen = false;
+
+    public string SidebarCssClass = "sidebar-container";
+    public string SidebarTextCssClass = "sidebar-button-text";
+    public string SidebarIconCssClass = "sidebar-button-icon";
+
+    protected override void OnInitialized()
+    {
+        ChangeSidebarClass();
+    }
+
+    public void ChangeSidebarClass() 
+    {
+        if (IsOpen) 
+        {
+            SidebarCssClass = "sidebar-container";
+            SidebarTextCssClass = "sidebar-button-text";
+            SidebarIconCssClass = "sidebar-button-icon";
+        }
+        else 
+        {
+            SidebarCssClass = "sidebar-container-hidden";
+            SidebarTextCssClass = "sidebar-button-text-hidden";
+            SidebarIconCssClass = "sidebar-button-icon-hidden";
+        }
+    }
+
+    public void ToggleSidebar() {
+        IsOpen = !IsOpen;
+        ChangeSidebarClass();
+    }
+}
