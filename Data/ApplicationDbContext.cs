@@ -15,6 +15,5 @@ namespace RetroClient.Data
 		}
 
 		public DbSet<VideoGame> VideoGames { get; set; }
-		public DbSet<VideoGamePlatform> Platforms { get; set; }
 	}
 }

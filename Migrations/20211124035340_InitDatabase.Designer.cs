@@ -8,7 +8,7 @@ using RetroClient.Data;
 namespace RetroClient.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211123052822_InitDatabase")]
+    [Migration("20211124035340_InitDatabase")]
     partial class InitDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -31,7 +31,7 @@ namespace RetroClient.Migrations
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("PlatformId")
+                    b.Property<string>("Platform")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SourceUrl")
@@ -39,34 +39,7 @@ namespace RetroClient.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PlatformId");
-
                     b.ToTable("VideoGames");
-                });
-
-            modelBuilder.Entity("RetroClient.Models.VideoGamePlatform", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("PlatformName")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Platforms");
-                });
-
-            modelBuilder.Entity("RetroClient.Models.VideoGame", b =>
-                {
-                    b.HasOne("RetroClient.Models.VideoGamePlatform", "Platform")
-                        .WithMany()
-                        .HasForeignKey("PlatformId");
-
-                    b.Navigation("Platform");
                 });
 #pragma warning restore 612, 618
         }

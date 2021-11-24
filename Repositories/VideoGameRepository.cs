@@ -18,36 +18,38 @@ namespace RetroClient.Repositories
 			_context = context;
 		}
 
-		public void Delete(object id)
+		public async void DeleteAsync(object id)
 		{
-			VideoGame game = _context.VideoGames.Find(id);
+			VideoGame game = await _context.VideoGames.FindAsync(id);
 			_context.VideoGames.Remove(game);
 		}
 
 
-		public IEnumerable<VideoGame> GetAll()
+		public async Task<IEnumerable<VideoGame>> GetAllAsync()
 		{
-			return _context.VideoGames.ToList();
+			return await _context.VideoGames.ToListAsync();
 		}
 
-		public VideoGame GetSingle(object id)
+		public async Task<VideoGame> GetSingleAsync(object id)
 		{
-			return _context.VideoGames.Find(id);
+			return await _context.VideoGames.FindAsync(id);
 		}
 
-		public void Insert(VideoGame game)
+		public async void InsertAsync(VideoGame game)
 		{
-			_context.VideoGames.Add(game);
+			await _context.VideoGames.AddAsync(game);
 		}
 
-		public void Save()
+		public async void SaveAsync()
 		{
-			_context.SaveChanges();
+			await _context.SaveChangesAsync();
 		}
 
-		public void Update(VideoGame game)
+		public async void UpdateAsync(VideoGame game)
 		{
-			_context.Entry(game).State = EntityState.Modified; 
+			VideoGame oldGame = await _context.VideoGames.FindAsync(game.Id);
+			oldGame = game;
+			_context.VideoGames.Update(oldGame);
 		}
 
 		protected virtual void Dispose(bool disposing)

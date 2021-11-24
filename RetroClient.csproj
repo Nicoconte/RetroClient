@@ -17,9 +17,6 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Services\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Update="RetroClientDB.db">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
