@@ -8,7 +8,7 @@ using RetroClient.Data;
 namespace RetroClient.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211124035340_InitDatabase")]
+    [Migration("20211126023515_InitDatabase")]
     partial class InitDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

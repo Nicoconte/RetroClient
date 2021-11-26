@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroClient", "RetroClient.csproj", "{6EF53922-B6F6-4E86-A39C-259291476A87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RetroClientCliTools", "..\RetroClientCliTools\RetroClientCliTools.csproj", "{F3FF59FD-9715-42D5-AAAD-76F412E2073D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroClientCliTools", "..\RetroClientCliTools\RetroClientCliTools.csproj", "{F3FF59FD-9715-42D5-AAAD-76F412E2073D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
