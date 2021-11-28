@@ -15,7 +15,7 @@
 		{
 			@foreach (var game in Games)
 			{
-				<GameCard Game="@game" />
+				<GameCard Game="@game" OnDeleteGameCallback="RefreshGameList"/>
 			}
 		}
 	</div>
@@ -37,7 +37,11 @@
 		gameService = new VideoGameService(context);
 
 		Games = gameService.ListGames().Result.ToList();
+	}
 
+	public async void RefreshGameList()
+	{
+		Games = gameService.ListGames().Result.ToList();
 	}
 
 }

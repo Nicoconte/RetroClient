@@ -32,6 +32,9 @@
 					<button @onclick="@(() => ShowEditGame(Game))" class="btn btn-sm mr-2 btn-outline-info">
 						<i class="fa fa-pencil"></i>
 					</button>
+					<button title="Download" @onclick="() => RemoveGame(Game.Id, Game.Name)" class="btn btn-sm btn-outline-danger mr-2">
+						<i class='fa fa-trash'></i>
+					</button>
 					<button title="Download" @onclick="() => DownloadGame(Game.DownloadUrl, Game.Name)" class="btn btn-sm btn-outline-success mr-3">
 						<i class='fa fa-download'></i>
 					</button>
@@ -48,10 +51,14 @@
 
 @code {
 
+	[Parameter] public EventCallback OnDeleteGameCallback { get; set; }
+
 	[Parameter]
 	public VideoGame Game { get; set; }
 
-	[Inject] [CascadingParameter] public IModalService Modal { get; set; }
+	[Inject]
+	[CascadingParameter]
+	public IModalService Modal { get; set; }
 
 	public string ProgressBarId { get; set; } = $"game-card-bar-{Guid.NewGuid().ToString()}";
 
@@ -64,6 +71,15 @@
 		_gameService = new VideoGameService(context);
 	}
 
+
+	private async Task RemoveGame(string id, string name)
+	{
+		await _gameService.DeleteGame(id);
+
+		toastService.ShowWarning($"{name} has been deleted successfully");
+
+		await OnDeleteGameCallback.InvokeAsync();
+	}
 
 	private string ParseName(string name)
 	{
