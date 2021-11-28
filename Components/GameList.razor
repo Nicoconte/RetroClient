@@ -1,5 +1,43 @@
-﻿<h3>GameList</h3>
+﻿@using RetroClient.Services;
+@using RetroClient.Data;
+@using RetroClient.Models;
+
+@inject ApplicationDbContext context;
+
+<div class="game-list-container">
+
+	<div class="row">
+		@if (Games.Count <= 0)
+		{
+			<h3>There no files <i class="fa fa-exclamation-triangle"></i></h3>
+		}
+		else
+		{
+			@foreach (var game in Games)
+			{
+				<GameCard Game="@game" />
+			}
+		}
+	</div>
+
+	<br />
+	<br />
+
+</div>
+
 
 @code {
+
+	public List<VideoGame> Games { get; set; } = new List<VideoGame>();
+
+	private VideoGameService gameService;
+
+	protected override async void OnInitialized()
+	{
+		gameService = new VideoGameService(context);
+
+		Games = gameService.ListGames().Result.ToList();
+
+	}
 
 }

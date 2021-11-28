@@ -1,5 +1,7 @@
 ﻿@inherits LayoutComponentBase
 
+@using Blazored.Toast.Configuration
+
 <div class="page">
 
     <NavMenu />
@@ -16,5 +18,7 @@
             @Body
         </div>
     </div>
+
+    <BlazoredToasts Position="ToastPosition.BottomRight" Timeout="5" />
 
 </div>

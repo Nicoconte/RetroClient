@@ -1,3 +1,4 @@
+using Blazored.Toast;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
 using Microsoft.AspNetCore.Builder;
@@ -31,7 +32,7 @@ namespace RetroClient
 				Height = 800,
 				AutoHideMenuBar = true
 			});
-			
+
 			window.OnClosed += () => {
 				Electron.App.Quit();
 			};
@@ -41,6 +42,9 @@ namespace RetroClient
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
 		{
+
+			services.AddBlazoredToast();
+
 			services.AddDbContext<ApplicationDbContext>(options => {
 				options.UseSqlite("Data source=RetroClientDB.db");
 			});

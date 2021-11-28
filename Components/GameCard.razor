@@ -1,5 +1,115 @@
-﻿<h3>GameCard</h3>
+﻿@using System.Net;
+@using System.ComponentModel;
+@using System.Diagnostics;
+@using System.IO;
+@using System.Threading;
+
+@using RetroClient.Models;
+
+@using Microsoft.JSInterop;
+
+@inject IToastService toastService;
+
+@inject IJSRuntime jsRuntime;
+
+<div class="col-lg-4 col-md-4 col-sm-6">
+	<div class="card ml-lg-5 mt-3" style="width: 19rem; height:16rem;">
+		<div class="card-body">
+			<h5 class="card-title">@Game.Name</h5>
+		</div>
+		<div class="card-body d-flex justify-content-end align-items-center flex-row">
+			<button title="Modify game" class="btn btn-sm btn-outline-primary mr-1">
+				<i class='fa fa-pencil'></i>
+			</button>
+			<button title="Download" @onclick="() => DownloadGame(Game.DownloadUrl, Game.Name)" class="btn btn-sm btn-outline-success mr-3">
+				<i class='fa fa-download'></i>
+			</button>
+		</div>
+		<div class="card-footer">
+			<GameCardProgressBar ProgressBarId="@ProgressBarId"/>
+		</div>
+	</div>
+</div>
+
+
 
 @code {
 
+	[Parameter]
+	public VideoGame Game { get; set; }
+
+	public string ProgressBarId { get; set; } = $"game-card-bar-{Guid.NewGuid().ToString()}";
+
+	private WebClient _client = new WebClient();
+
+	protected override void OnInitialized()
+	{
+
+	}
+
+	private void DownloadGame(string url, string gameName)
+	{
+		toastService.ShowInfo($"Starting download. Game: {gameName} ", "");
+
+		var filename = $"{gameName}.zip";
+		var outputPath = $"D:/Descargas Disco D/{filename}";
+
+		try
+		{
+
+			//First request to Http Emuparadise
+			Console.WriteLine($"First Call to {url}");
+			HttpWebRequest req = (HttpWebRequest)WebRequest.Create(url);
+			req.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36");
+			req.Headers.Add("cookie", "refexception=1");
+			req.AllowAutoRedirect = false;
+
+			HttpWebResponse res = (HttpWebResponse)req.GetResponse();
+
+
+			//Second request to Https Emuparadise
+			Console.WriteLine($"\nSecond Call to {res.Headers["Location"]}");
+			HttpWebRequest req2 = (HttpWebRequest)WebRequest.Create(res.Headers["Location"]);
+			req2.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36");
+			req2.Headers.Add("cookie", "refexception=1");
+			req2.AllowAutoRedirect = false;
+
+			HttpWebResponse res2 = (HttpWebResponse)req2.GetResponse();
+
+
+			//Third request to Http 162.192.etc.... (Server that contain the game)
+			Console.WriteLine($"\nThird Call to {res2.Headers["Location"]}");
+			HttpWebRequest req3 = (HttpWebRequest)WebRequest.Create(res2.Headers["Location"]);
+			req3.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36");
+			req3.Headers.Add("cookie", "refexception=1");
+			req3.AllowAutoRedirect = false;
+
+			HttpWebResponse res3 = (HttpWebResponse)req3.GetResponse();
+
+
+			//Finally we download the game by calling the server where the game is stored
+			Console.WriteLine($"\nLast call to {res3.Headers["Location"]}");
+			_client.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36");
+			_client.Headers.Add("cookie", "refexception=1");
+
+			_client.DownloadProgressChanged += (s, e) =>
+			{
+				jsRuntime.InvokeVoidAsync("increaseProgressBar", new object[] { ProgressBarId, e.ProgressPercentage });
+				Console.WriteLine("Percentage: " + e.ProgressPercentage + "%");
+			};
+
+			_client.DownloadFileCompleted += (s, e) =>
+			{
+				toastService.ShowSuccess($"{gameName} has been downloaded successfully");
+			};
+
+			_client.DownloadFileAsync(new Uri(res3.Headers["Location"]), outputPath);
+
+		}
+		catch (Exception ex)
+		{
+			toastService.ShowError(ex.Message);
+		}
+
+	}
 }
