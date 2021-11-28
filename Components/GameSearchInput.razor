@@ -1,9 +1,16 @@
 ﻿<div class="game-search-input-container">
     <div class="game-search-input">
-        <input type="text" class='form-group' placeholder="  Search game...">
+        <input type="text" @oninput="(e) => CapturaValueFromInput((string)e.Value)" class='form-group' placeholder="  Search game...">
     </div>
 </div>
 
 @code {
 
+	[Parameter]
+	public EventCallback<string> OnGameFilterCallback { get; set; }
+
+	public void CapturaValueFromInput(string input)
+	{
+		OnGameFilterCallback.InvokeAsync(input);
+	}
 }

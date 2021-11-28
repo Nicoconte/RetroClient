@@ -7,9 +7,18 @@
 <div class="game-list-container container">
 
 	<div class="row">
+		<div class="game-card-search-input w-75 h-100">
+			<GameSearchInput OnGameFilterCallback="RefreshGameListByName" />
+		</div>
+		<div class="game-card-filter-input w-25 h-100">
+			<GameFilter Filters="Platforms" OnGameFilterCallback="RefreshGameListByPlatform" />
+		</div>
+	</div>	
+
+	<div class="row">
 		@if (Games.Count <= 0)
 		{
-			<h3>There no files <i class="fa fa-exclamation-triangle"></i></h3>
+			<h3 class="ml-lg-5 mt-5">There no files <i class="fa fa-exclamation-triangle"></i></h3>
 		}
 		else
 		{
@@ -30,18 +39,47 @@
 
 	public List<VideoGame> Games { get; set; } = new List<VideoGame>();
 
+	public List<string> Platforms { get; set; } = new List<string>();
+
 	private VideoGameService gameService;
 
-	protected override async void OnInitialized()
+	protected override void OnInitialized()
 	{
 		gameService = new VideoGameService(context);
 
 		Games = gameService.ListGames().Result.ToList();
+
+		Games.ForEach(g =>
+		{
+			if (!Platforms.Contains(g.Platform))
+			{
+				Platforms.Add(g.Platform);
+			}
+		});
+
 	}
 
-	public async void RefreshGameList()
+
+	public void RefreshGameList()
 	{
 		Games = gameService.ListGames().Result.ToList();
+	}
+
+	public void RefreshGameListByName(string name)
+	{
+		Games = gameService.ListGames().Result.ToList().Where(g => g.Name.Contains(name)).ToList();
+	}
+
+	public void RefreshGameListByPlatform(string platform)
+	{
+		if (platform == "all")
+		{
+			RefreshGameList();
+
+			return;
+		}
+
+		Games = gameService.ListGames().Result.ToList().Where(g => g.Platform == platform).ToList();
 	}
 
 }

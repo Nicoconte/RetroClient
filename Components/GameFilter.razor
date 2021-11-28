@@ -1,0 +1,25 @@
+﻿
+<div class="game-filter-container">
+	<select id="inputState" class="form-control" @onchange="(e) => CapturaValueFromInput((string)e.Value)">
+		<option value="all" selected>All</option>
+		@foreach (var filter in Filters)
+		{
+			<option value="@filter">@filter</option>
+		}
+	</select>
+</div>
+
+@code {
+
+	[Parameter]
+	public List<string> Filters { get; set; } = new List<string>();
+
+	[Parameter]
+	public EventCallback<string> OnGameFilterCallback { get; set; }
+
+	public void CapturaValueFromInput(string input)
+	{
+		OnGameFilterCallback.InvokeAsync(input);
+	}
+
+}

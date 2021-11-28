@@ -76,7 +76,7 @@
 	{
 		await _gameService.DeleteGame(id);
 
-		toastService.ShowWarning($"{name} has been deleted successfully");
+		toastService.ShowSuccess($"{name} has been deleted successfully");
 
 		await OnDeleteGameCallback.InvokeAsync();
 	}

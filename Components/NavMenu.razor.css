@@ -50,7 +50,7 @@
     align-items: center;
 }
 .sidebar-button-icon i {
-    font-size: 30px; 
+    font-size: 25px; 
     margin-bottom: 2px; 
 }
 
@@ -64,9 +64,9 @@
 }
 
 .sidebar-button-text span {
-    font-size:20px;
-    font-weight: 600;
-    margin-left:30px;
+    font-size:16px;
+    font-weight: 500;
+    margin-left: 15px;
 }
 
 .sidebar-button-text-hidden {
@@ -87,7 +87,7 @@
 }
 
 .sidebar-button-icon-hidden i {
-    font-size: 30px; 
+    font-size: 25px; 
     margin-bottom: 2px;
     margin-left: 1px;       
 }
