@@ -18,7 +18,7 @@ namespace RetroClient.Repositories
 			_context = context;
 		}
 
-		public async void DeleteAsync(object id)
+		public async Task DeleteAsync(object id)
 		{
 			VideoGame game = await _context.VideoGames.FindAsync(id);
 			_context.VideoGames.Remove(game);
@@ -32,20 +32,20 @@ namespace RetroClient.Repositories
 
 		public async Task<VideoGame> GetSingleAsync(object id)
 		{
-			return await _context.VideoGames.FindAsync(id);
+			return await _context.VideoGames.FindAsync(id) ?? null;
 		}
 
-		public async void InsertAsync(VideoGame game)
+		public async Task InsertAsync(VideoGame game)
 		{
 			await _context.VideoGames.AddAsync(game);
 		}
 
-		public async void SaveAsync()
+		public async Task SaveAsync()
 		{
 			await _context.SaveChangesAsync();
 		}
 
-		public async void UpdateAsync(VideoGame game)
+		public async Task UpdateAsync(VideoGame game)
 		{
 			VideoGame oldGame = await _context.VideoGames.FindAsync(game.Id);
 			oldGame = game;

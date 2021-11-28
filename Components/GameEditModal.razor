@@ -1,0 +1,42 @@
+﻿
+@using RetroClient.Models
+@using RetroClient.Data;
+@using RetroClient.Services;
+
+@inject ApplicationDbContext context;
+
+<div class="simple-form" style="width:575px;height:230px;">
+
+	<div class="form-group">
+		<label for="movie-name">Name</label>
+		<input @bind="@VideoGame.Name" type="text" class="form-control" />
+	</div>
+
+	<div class="form-group">
+		<label for="year">Image url</label>
+		<input @bind="@VideoGame.ImageUrl" type="text" class="form-control" />
+	</div>
+
+	<button @onclick="UpdateGame" class="btn btn-success mt-4">Save <i class="fa fa-floppy-o ml-1"></i></button>
+</div>
+
+@code {
+
+	[CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+
+	[Parameter] public VideoGame VideoGame { get; set; }
+
+	private VideoGameService _gameService;
+
+	protected override void OnInitialized()
+	{
+		_gameService = new VideoGameService(context);
+	}
+
+	async void UpdateGame()
+	{
+		await _gameService.UpdateGame(VideoGame);
+		await ModalInstance.Close(ModalResult.Ok<VideoGame>(VideoGame));
+	}
+
+}

@@ -8,7 +8,7 @@ using RetroClient.Data;
 namespace RetroClient.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211126023515_InitDatabase")]
+    [Migration("20211128043036_InitDatabase")]
     partial class InitDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -26,6 +26,9 @@ namespace RetroClient.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("DownloadUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("ImageUrl")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")

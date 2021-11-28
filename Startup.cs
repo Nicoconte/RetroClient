@@ -1,3 +1,4 @@
+using Blazored.Modal;
 using Blazored.Toast;
 using ElectronNET.API;
 using ElectronNET.API.Entities;
@@ -43,6 +44,7 @@ namespace RetroClient
 		public void ConfigureServices(IServiceCollection services)
 		{
 
+			services.AddBlazoredModal();
 			services.AddBlazoredToast();
 
 			services.AddDbContext<ApplicationDbContext>(options => {

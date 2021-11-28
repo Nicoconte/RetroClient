@@ -8,11 +8,11 @@ namespace RetroClient.Repositories
 {
 	interface IVideoGameRepository
 	{
-		void SaveAsync();
+		Task SaveAsync();
 		Task<VideoGame> GetSingleAsync(object id);
 		Task<IEnumerable<VideoGame>> GetAllAsync();
-		void InsertAsync(VideoGame game);
-		void UpdateAsync(VideoGame game);
-		void DeleteAsync(object id);
+		Task InsertAsync(VideoGame game);
+		Task UpdateAsync(VideoGame game);
+		Task DeleteAsync(object id);
 	}
 }

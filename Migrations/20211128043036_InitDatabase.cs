@@ -15,6 +15,7 @@ namespace RetroClient.Migrations
                     Platform = table.Column<string>(type: "TEXT", nullable: true),
                     DownloadUrl = table.Column<string>(type: "TEXT", nullable: true),
                     SourceUrl = table.Column<string>(type: "TEXT", nullable: true),
+                    ImageUrl = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

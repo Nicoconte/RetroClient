@@ -20,15 +20,15 @@ namespace RetroClient.Services
 			_gameRepository = new VideoGameRepository(_context);
 		}
 
-		public async void InsertGame(VideoGame newGame)
+		public async Task InsertGame(VideoGame newGame)
 		{
 			if (newGame is null)
 			{
 				throw new Exception("Entity cannot be null");
 			}
 
-			_gameRepository.InsertAsync(newGame);
-			_gameRepository.SaveAsync();
+			await _gameRepository.InsertAsync(newGame);
+			await _gameRepository.SaveAsync();
 		}
 
 		public async Task<IEnumerable<VideoGame>> ListGames()
@@ -43,21 +43,21 @@ namespace RetroClient.Services
 				throw new Exception("id cannot be null");
 			}
 
-			return await _gameRepository.GetSingleAsync(id);
+			return await _gameRepository.GetSingleAsync(id) ?? null;
 		}
 
-		public async void DeleteGame(object id)
+		public async Task DeleteGame(object id)
 		{
 			if (id is null)
 			{
 				throw new Exception("id cannot be null");
 			}
 
-			_gameRepository.DeleteAsync(id);
-			_gameRepository.SaveAsync();
+			await _gameRepository.DeleteAsync(id);
+			await _gameRepository.SaveAsync();
 		}
 
-		public async void UpdateGame(VideoGame game)
+		public async Task UpdateGame(VideoGame game)
 		{
 
 			if (game is null)
@@ -65,8 +65,8 @@ namespace RetroClient.Services
 				throw new Exception("Entity cannot be null");
 			}
 
-			_gameRepository.UpdateAsync(game);
-			_gameRepository.SaveAsync();
+			await _gameRepository.UpdateAsync(game);
+			await _gameRepository.SaveAsync();
 		}
 	}
 }

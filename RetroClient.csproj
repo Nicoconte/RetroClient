@@ -5,6 +5,7 @@
 	<PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Blazored.Modal" Version="5.0.3" />
     <PackageReference Include="Blazored.Toast" Version="3.2.2" />
     <PackageReference Include="ElectronNET.API" Version="13.5.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.0" />
@@ -18,10 +19,5 @@
     <Content Update="electron.manifest.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="RetroClientDB.db">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 </Project>

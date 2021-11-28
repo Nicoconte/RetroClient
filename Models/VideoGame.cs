@@ -12,6 +12,7 @@ namespace RetroClient.Models
 		public string Platform { get; set; }
 		public string DownloadUrl { get; set; }
 		public string SourceUrl { get; set; }
+		public string ImageUrl { get; set; }
 		public string CreatedAt { get; set; } = DateTime.UtcNow.AddHours(-3).ToString();
 	}
 }
