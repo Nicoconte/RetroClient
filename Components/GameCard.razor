@@ -5,6 +5,7 @@
 @using System.Threading;
 @using Microsoft.JSInterop;
 
+@using RetroClient.Helpers;
 @using RetroClient.Models;
 @using RetroClient.Services;
 @using RetroClient.Data; 
@@ -19,7 +20,7 @@
 	<div class="card mt-5 game-card-container" style="width: 20rem; height:28rem;margin-left:20px;">
 		<div class="card-body">
 			<div class="game-card-image">
-				<img src="@Game.ImageUrl" alt="Alternate Text" style="width:99%;height:95%;" />
+				<img src="@Game.ImageUrl" alt="Alternate Text" style="width:100%;height:80%;" />
 			</div>
 			<div class="game-card-title">
 				<span class="card-title">@ParseName(Game.Name)</span>
@@ -29,12 +30,6 @@
 					<span>@Game.Platform</span>
 				</div>
 				<div class="game-card-actions"
-					<button @onclick="@(() => ShowEditGame(Game))" class="btn btn-sm mr-2 btn-outline-info">
-						<i class="fa fa-pencil"></i>
-					</button>
-					<button title="Download" @onclick="() => RemoveGame(Game.Id, Game.Name)" class="btn btn-sm btn-outline-danger mr-2">
-						<i class='fa fa-trash'></i>
-					</button>
 					<button title="Download" @onclick="() => DownloadGame(Game.DownloadUrl, Game.Name)" class="btn btn-sm btn-outline-success mr-3">
 						<i class='fa fa-download'></i>
 					</button>
@@ -71,61 +66,18 @@
 		_gameService = new VideoGameService(context);
 	}
 
-
-	private async Task RemoveGame(string id, string name)
-	{
-		await _gameService.DeleteGame(id);
-
-		toastService.ShowSuccess($"{name} has been deleted successfully");
-
-		await OnDeleteGameCallback.InvokeAsync();
-	}
-
 	private string ParseName(string name)
 	{
 		return name.Length > 40 ? name.Substring(0, 40).TrimEnd().TrimStart() : name.TrimEnd().TrimStart();
 	}
 
 
-	private async void ShowEditGame(VideoGame game)
-	{
-		try
-		{
-
-			var options = new ModalOptions()
-			{
-				Animation = ModalAnimation.FadeInOut(0.3)
-			};
-
-			var parameters = new ModalParameters();
-			parameters.Add(nameof(VideoGame), game);
-
-			var modal = Modal.Show<GameEditModal>($"Edit Game: {game.Name}", parameters, options);
-			var result = await modal.Result;
-
-			Console.WriteLine(result);
-
-			if (!result.Cancelled)
-			{
-				Game = (VideoGame)result.Data;
-
-				StateHasChanged();
-			}
-
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex.Message);
-		}
-
-	}
-
-	private void DownloadGame(string url, string gameName)
+	private async void DownloadGame(string url, string gameName)
 	{
 		toastService.ShowInfo($"Starting download. Game: {gameName} ", "");
 
 		var filename = $"{gameName}.zip";
-		var outputPath = $"D:/GIT/_me/RetroClientOutput/Descargas/{filename}";
+		var outputPath = $"{PathHelper.OUTPUT_PATH}/Games/{filename}";
 
 		try
 		{
@@ -174,6 +126,8 @@
 			_client.DownloadFileCompleted += (s, e) =>
 			{
 				toastService.ShowSuccess($"{gameName} has been downloaded successfully");
+				Game.Active = true;
+				_gameService.UpdateGame(Game);
 			};
 
 			_client.DownloadFileAsync(new Uri(res3.Headers["Location"]), outputPath);

@@ -8,7 +8,7 @@ using RetroClient.Data;
 namespace RetroClient.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211128043036_InitDatabase")]
+    [Migration("20211129021735_InitDatabase")]
     partial class InitDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -17,10 +17,32 @@ namespace RetroClient.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "5.0.0");
 
+            modelBuilder.Entity("RetroClient.Models.Setting", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GamesPath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RetroArchCorePath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RetroArchPath")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserSettings");
+                });
+
             modelBuilder.Entity("RetroClient.Models.VideoGame", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("Active")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("CreatedAt")
                         .HasColumnType("TEXT");

@@ -1,0 +1,46 @@
+﻿@page "/settings"
+
+@using RetroClient.Data;
+@using RetroClient.Models;
+@using RetroClient.Services;
+
+@inject ApplicationDbContext context;
+
+<div class="settings-container">
+	<div class="mt-3 ml-4 w-75">
+
+		<div class="form-group">
+			<label for="movie-name">Game path</label>
+			<input @bind="@Setting.GamesPath" type="text" class="form-control" />
+		</div>
+
+		<div class="form-group">
+			<label for="movie-name">RetroArch path</label>
+			<input @bind="@Setting.RetroArchPath" type="text" class="form-control" />
+		</div>
+
+		<div class="form-group">
+			<label for="movie-name">RetroArchCore path</label>
+			<input @bind="@Setting.RetroArchCorePath" type="text" class="form-control" />
+		</div>
+
+	</div>
+</div>
+
+@code {
+
+	private SettingService _settingService { get; set; }
+
+	public Setting Setting;
+
+	[Inject]
+	public IJSRuntime jsRuntime { get; set; }
+
+	protected override void OnInitialized()
+	{
+		_settingService = new SettingService(context);
+
+		Setting = _settingService.ListSettings().Result.FirstOrDefault();
+	}
+
+}

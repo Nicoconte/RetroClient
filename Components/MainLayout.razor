@@ -4,10 +4,13 @@
 
 <div class="page">
 
-    <NavMenu />
+    <NavMenu OnDescriptionChangeCallback="GetViewDescription" />
 
     <div class="main">
         <div class="upper-bar">
+			<div class="upper-bar-text">
+				<span>@ViewDescription</span>
+            </div>
             <div class="upper-help-button">
                 <button class='btn'>
                     <i class='fa fa-question-circle'></i>
@@ -22,3 +25,13 @@
     <BlazoredToasts Position="ToastPosition.BottomRight" Timeout="2" />
 
 </div>
+
+@code {
+
+	public string ViewDescription { get; set; }
+
+	public void GetViewDescription(string description)
+	{
+		ViewDescription = description;
+	}
+}

@@ -1,0 +1,148 @@
+﻿@using System.Net;
+@using System.ComponentModel;
+@using System.Diagnostics;
+@using System.IO;
+@using System.Threading;
+@using Microsoft.JSInterop;
+
+@using RetroClient.Models;
+@using RetroClient.Services;
+@using RetroClient.Data;
+@using RetroClient.Helpers;
+
+@using Blazored.Modal;
+
+@inject IToastService toastService;
+@inject ApplicationDbContext context;
+
+<div class="col-lg-4 col-md-4 col-sm-6" title="@Game.Name">
+	<div class="card mt-5 game-card-container" style="width: 20rem; height:28rem;margin-left:20px;">
+		<div class="card-body">
+			<div class="game-card-image">
+				<img src="@Game.ImageUrl" alt="Alternate Text" style="width:100%;height:80%;" />
+			</div>
+			<div class="game-card-title">
+				<span class="card-title">@ParseName(Game.Name)</span>
+			</div>
+			<div class="game-card-details">
+				<div class="game-card-platform">
+					<span>@Game.Platform</span>
+				</div>
+				<div class="game-card-actions"
+					<button @onclick="@(() => ShowEditGame(Game))" class="btn btn-sm mr-2 btn-outline-info">
+						<i class="fa fa-pencil"></i>
+					</button>
+					<button title="Download" @onclick="() => RemoveGame(Game.Id, Game.Name)" class="btn btn-sm btn-outline-danger mr-2">
+						<i class='fa fa-trash'></i>
+					</button>
+					<button title="Download" class="btn btn-sm btn-outline-success mr-3">
+						<i class='fa fa-play'></i>
+					</button>
+				</div>
+			</div>
+		</div>
+		<div class="card-footer">
+			<span class="ml-2" style="font-size:15px;">
+				<a href="@Game.SourceUrl" target="_blank">Go to source</a>
+			</span>
+		</div>
+	</div>
+</div>
+
+
+
+@code {
+
+	[Parameter] public EventCallback OnDeleteGameCallback { get; set; }
+
+	[Parameter]
+	public VideoGame Game { get; set; }
+
+	[Parameter]
+	public string CurrentGameName { get; set; }
+
+	[Inject]
+	[CascadingParameter]
+	public IModalService Modal { get; set; }
+
+
+	public string ProgressBarId { get; set; } = $"game-card-bar-{Guid.NewGuid().ToString()}";
+
+	private WebClient _client = new WebClient();
+
+	private VideoGameService _gameService { get; set; }
+	private SettingService _settingService { get; set; }
+
+	private Setting _userSetting { get; set; }
+
+	protected override void OnInitialized()
+	{
+		_gameService = new VideoGameService(context);
+		_settingService = new SettingService(context);
+
+		_userSetting = _settingService.ListSettings().Result.FirstOrDefault();
+	}
+
+
+	private async Task RemoveGame(string id, string name)
+	{
+
+		Game.Active = false;
+
+		await _gameService.UpdateGame(Game);
+
+		toastService.ShowSuccess($"{name} has been deleted successfully");
+
+		File.Delete($"{_userSetting.GamesPath}{Game.Name}.zip");
+
+		await OnDeleteGameCallback.InvokeAsync();
+	}
+
+	private string ParseName(string name)
+	{
+		return name.Length > 40 ? name.Substring(0, 40).TrimEnd().TrimStart() : name.TrimEnd().TrimStart();
+	}
+
+
+	private async void ShowEditGame(VideoGame game)
+	{
+		try
+		{
+
+			var options = new ModalOptions()
+			{
+				Animation = ModalAnimation.FadeInOut(0.3)
+			};
+
+			var parameters = new ModalParameters();
+			parameters.Add(nameof(VideoGame), game);
+
+			var modal = Modal.Show<GameEditModal>($"Edit Game: {game.Name}", parameters, options);
+			var result = await modal.Result;
+
+			Console.WriteLine(result);
+
+			if (!result.Cancelled)
+			{
+
+				Game = (VideoGame)result.Data;
+
+				//Reemplazamos el archivo viejo con el nuevo
+				var oldGame = $"{_userSetting.GamesPath}{CurrentGameName}.zip";
+				var newGame = $"{_userSetting.GamesPath}{Game.Name}.zip";
+
+				FileHelper.ReplaceFilename(oldGame, newGame);
+
+				StateHasChanged();
+			}
+
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+			Console.WriteLine(ex.StackTrace);
+			Console.WriteLine(ex.InnerException);
+		}
+
+	}
+}

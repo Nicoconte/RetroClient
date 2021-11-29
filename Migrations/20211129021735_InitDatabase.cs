@@ -7,6 +7,20 @@ namespace RetroClient.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "UserSettings",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "TEXT", nullable: false),
+                    GamesPath = table.Column<string>(type: "TEXT", nullable: true),
+                    RetroArchPath = table.Column<string>(type: "TEXT", nullable: true),
+                    RetroArchCorePath = table.Column<string>(type: "TEXT", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserSettings", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "VideoGames",
                 columns: table => new
                 {
@@ -16,6 +30,7 @@ namespace RetroClient.Migrations
                     DownloadUrl = table.Column<string>(type: "TEXT", nullable: true),
                     SourceUrl = table.Column<string>(type: "TEXT", nullable: true),
                     ImageUrl = table.Column<string>(type: "TEXT", nullable: true),
+                    Active = table.Column<bool>(type: "INTEGER", nullable: false),
                     CreatedAt = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
@@ -26,6 +41,9 @@ namespace RetroClient.Migrations
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "UserSettings");
+
             migrationBuilder.DropTable(
                 name: "VideoGames");
         }

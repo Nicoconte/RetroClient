@@ -19,6 +19,21 @@
     border-bottom: 1px solid black;
 }
 
+.upper-bar-text {
+    width:70%;
+    height:100%;
+    display:flex;
+    justify-content:flex-start;
+    align-items:center;
+}
+
+.upper-bar-text span {
+    font-size:23px;
+    margin-left:20px;
+    margin-top:15px;
+    font-weight:600;
+}
+
 .upper-help-button {
     width:30%;
     height:100%;

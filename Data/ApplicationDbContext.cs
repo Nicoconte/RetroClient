@@ -15,5 +15,6 @@ namespace RetroClient.Data
 		}
 
 		public DbSet<VideoGame> VideoGames { get; set; }
+		public DbSet<Setting> UserSettings { get; set; }
 	}
 }

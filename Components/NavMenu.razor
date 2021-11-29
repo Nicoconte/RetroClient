@@ -6,7 +6,7 @@
     </div>
 	<div class="sidebar-content-container">
 
-		<a href='/' class="btn sidebar-button-container">
+		<a href='/' class="btn sidebar-button-container" @onclick='() => SendDescription("")'>
 			<div class="@SidebarIconCssClass">
 				<i class='fa fa-home'></i>
 			</div>
@@ -15,7 +15,7 @@
 			</div>
 		</a>
 
-		<a href='/browse-games' class="btn sidebar-button-container">
+		<a href='/browse-games' class="btn sidebar-button-container" @onclick='() => SendDescription("Browse Games")'>
 			<div class="@SidebarIconCssClass">
 				<i class='fa fa-shopping-bag'></i>
 			</div>
@@ -24,7 +24,7 @@
 			</div>
 		</a>
 
-		<a class="btn sidebar-button-container">
+		<a href="/game-library" class="btn sidebar-button-container" @onclick='() => SendDescription("Game Library")'>
 			<div class="@SidebarIconCssClass">
 				<i class='fa fa-cubes'></i>
 			</div>
@@ -33,16 +33,7 @@
 			</div>
 		</a>
 
-		<a class="btn sidebar-button-container">
-			<div class="@SidebarIconCssClass">
-				<i class='fa fa-gamepad'></i>
-			</div>
-			<div class="@SidebarTextCssClass">
-				<span>RetroArch</span>
-			</div>
-		</a>
-
-		<a class="btn sidebar-button-container">
+		<a href="/settings" class="btn sidebar-button-container" @onclick='() => SendDescription("Settings")'>
 			<div class="@SidebarIconCssClass">
 				<i class='fa fa-cogs'></i>
 			</div>
@@ -68,35 +59,44 @@
 </div>
 
 @code {    
-    public bool IsOpen = false;
 
-    public string SidebarCssClass = "sidebar-container";
-    public string SidebarTextCssClass = "sidebar-button-text";
-    public string SidebarIconCssClass = "sidebar-button-icon";
+	[Parameter]
+	public EventCallback<string> OnDescriptionChangeCallback { get; set; }
 
-    protected override void OnInitialized()
-    {
-        ChangeSidebarClass();
-    }
+	public bool IsOpen = false;
 
-    public void ChangeSidebarClass() 
-    {
-        if (IsOpen) 
-        {
-            SidebarCssClass = "sidebar-container";
-            SidebarTextCssClass = "sidebar-button-text";
-            SidebarIconCssClass = "sidebar-button-icon";
-        }
-        else 
-        {
-            SidebarCssClass = "sidebar-container-hidden";
-            SidebarTextCssClass = "sidebar-button-text-hidden";
-            SidebarIconCssClass = "sidebar-button-icon-hidden";
-        }
-    }
+	public string SidebarCssClass = "sidebar-container";
+	public string SidebarTextCssClass = "sidebar-button-text";
+	public string SidebarIconCssClass = "sidebar-button-icon";
 
-    public void ToggleSidebar() {
-        IsOpen = !IsOpen;
-        ChangeSidebarClass();
-    }
+	protected override void OnInitialized()
+	{
+		ChangeSidebarClass();
+	}
+
+	public void SendDescription(string description)
+	{
+		OnDescriptionChangeCallback.InvokeAsync(description);
+	}
+
+	public void ChangeSidebarClass()
+	{
+		if (IsOpen)
+		{
+			SidebarCssClass = "sidebar-container";
+			SidebarTextCssClass = "sidebar-button-text";
+			SidebarIconCssClass = "sidebar-button-icon";
+		}
+		else
+		{
+			SidebarCssClass = "sidebar-container-hidden";
+			SidebarTextCssClass = "sidebar-button-text-hidden";
+			SidebarIconCssClass = "sidebar-button-icon-hidden";
+		}
+	}
+
+	public void ToggleSidebar() {
+		IsOpen = !IsOpen;
+		ChangeSidebarClass();
+	}
 }
