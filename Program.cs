@@ -21,9 +21,9 @@ namespace RetroClient
 			Host.CreateDefaultBuilder(args)
 				.ConfigureWebHostDefaults(webBuilder =>
 				{
-					webBuilder.UseStartup<Startup>();
-					webBuilder.UseEnvironment("Development");
 					webBuilder.UseElectron(args);
+					webBuilder.UseEnvironment("Development");
+					webBuilder.UseStartup<Startup>();
 				});
 	}
 }

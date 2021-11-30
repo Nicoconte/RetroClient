@@ -7,10 +7,10 @@
 <div class="game-list-container container">
 
 	<div class="row">
-		<div class="game-card-search-input w-75 h-100">
+		<div class="game-card-search-input w-50 h-100">
 			<GameSearchInput OnGameFilterCallback="RefreshGameListByName" />
 		</div>
-		<div class="game-card-filter-input w-25 h-100">
+		<div class="game-card-filter-input w-50 h-100">
 			<GameFilter Filters="Platforms" OnGameFilterCallback="RefreshGameListByPlatform" />
 		</div>
 	</div>	
@@ -62,12 +62,12 @@
 
 	public void RefreshGameList()
 	{
-		Games = gameService.ListGames().Result.ToList();
+		Games = gameService.ListGames().Result.ToList().Take(50).ToList();
 	}
 
 	public void RefreshGameListByName(string name)
 	{
-		Games = gameService.ListGames().Result.ToList().Where(g => g.Name.Contains(name)).ToList();
+		Games = gameService.ListGames().Result.ToList().Where(g => g.Name.ToLower().Contains(name.ToLower())).ToList();
 	}
 
 	public void RefreshGameListByPlatform(string platform)

@@ -1,7 +1,7 @@
 ﻿
 <div class="game-filter-container">
 	<select id="inputState" class="form-control" @onchange="(e) => CapturaValueFromInput((string)e.Value)">
-		<option selected disabled>Choose a filter</option>
+		<option selected disabled>Choose platform</option>
 		<option value="all">All</option>
 		@foreach (var filter in Filters)
 		{

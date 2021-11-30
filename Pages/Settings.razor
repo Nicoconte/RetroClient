@@ -1,46 +1,157 @@
 ﻿@page "/settings"
 
+@using System.IO;
+@using System.Linq; 
+
 @using RetroClient.Data;
 @using RetroClient.Models;
 @using RetroClient.Services;
+@using RetroClient.Helpers; 
+
+@using ElectronNET.API;
+@using ElectronNET.API.Entities; 
+
+@using Blazored.Toast;
 
 @inject ApplicationDbContext context;
+@inject IToastService toastService;
 
-<div class="settings-container">
-	<div class="mt-3 ml-4 w-75">
+<div class="settings-container container d-flex justify-content-center">
+	<div class="mt-3 ml-2 w-75">
 
-		<div class="form-group">
+		<div class="form-group mt-5">
 			<label for="movie-name">Game path</label>
-			<input @bind="@Setting.GamesPath" type="text" class="form-control" />
+			<input @bind="@Setting.GamesPath" type="text" class="form-control" readonly />
+			<button @onclick='() => ChooseDirectory("GamePath")' class="btn btn-outline-success btn-sm mt-3">Choose path</button>
 		</div>
 
-		<div class="form-group">
+		<div class="form-group mt-4">
 			<label for="movie-name">RetroArch path</label>
-			<input @bind="@Setting.RetroArchPath" type="text" class="form-control" />
+			<input @bind="@Setting.RetroArchPath" type="text" class="form-control" readonly />
+			<button @onclick='() => ChooseDirectory("RetroArchPath")' class="btn btn-outline-success btn-sm mt-3">Choose path</button>
 		</div>
 
-		<div class="form-group">
+		<div class="form-group mt-4">
 			<label for="movie-name">RetroArchCore path</label>
-			<input @bind="@Setting.RetroArchCorePath" type="text" class="form-control" />
+			<input @bind="@Setting.RetroArchCorePath" type="text" class="form-control" readonly />
+			<button @onclick='() => ChooseDirectory("RetroArchCorePath")' class="btn btn-outline-success btn-sm mt-3">Choose path</button>
 		</div>
+
+		<button @onclick="SaveSettings" class="btn btn-outline-primary btn-sm mt-4">
+			<span>
+				Save settings
+				<i class="fa fa-pencil ml-1"></i>
+			</span>
+		</button>
 
 	</div>
+
 </div>
 
 @code {
 
+	private VideoGameService _gameService { get; set; }
+
 	private SettingService _settingService { get; set; }
+
+	private List<VideoGame> _games { get; set; }
+
+	private string _pathType { get; set; }
+	private string _prevGamePath { get; set; }
 
 	public Setting Setting;
 
-	[Inject]
-	public IJSRuntime jsRuntime { get; set; }
-
 	protected override void OnInitialized()
 	{
+		_gameService = new VideoGameService(context);
 		_settingService = new SettingService(context);
 
 		Setting = _settingService.ListSettings().Result.FirstOrDefault();
+
+		_games = _gameService.ListGames().Result.ToList();
+	}
+
+	public async void ChooseDirectory(string pathType)
+	{
+		try
+		{
+
+			var mainWindow = Electron.WindowManager.BrowserWindows.ToList().FirstOrDefault();
+			var options = new OpenDialogOptions
+			{
+				Title = "Open HTML file",
+				DefaultPath = Setting.GamesPath,
+				Properties = new OpenDialogProperty[] { OpenDialogProperty.openDirectory }
+			};
+
+			var result = await Electron.Dialog.ShowOpenDialogAsync(mainWindow, options);
+
+			result[0] = result[0].Replace('\\', '/');
+
+			switch (pathType)
+			{
+				case "GamePath":
+
+					//In case we change the game path, we should store the path to know where the games were.
+					_prevGamePath = Setting.GamesPath;
+
+					Setting.GamesPath = $"{result[0]}/";
+
+					_pathType = pathType;
+
+					break;
+
+				case "RetroArchPath":
+					Setting.RetroArchPath = $"{result[0]}/";
+					break;
+
+				case "RetroArchCorePath":
+					Setting.RetroArchCorePath = $"{result[0]}/";
+					break;
+
+				default:
+					break;
+			}
+
+			_pathType = pathType;
+
+			StateHasChanged();
+		}
+		catch(Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+			Console.WriteLine(ex.StackTrace);
+			Console.WriteLine(ex.InnerException);
+		}
+
+	}
+
+	public async void SaveSettings()
+	{
+		if (_pathType == "GamePath")
+		{
+			Console.WriteLine(_prevGamePath + " -> " + Setting.GamesPath);
+
+			//We only move all the game we download from the application. Another files will be ignored
+			List<string> filesPath = new List<string>();
+			List<string> filesFromDir = Directory.GetFiles(_prevGamePath).ToList();
+
+			foreach (var file in filesFromDir)
+			{
+				string filename = Path.GetFileName(file);
+
+				if (_games.Any(g => $"{g.Name}.{g.FileExtension}" == filename))
+				{
+					filesPath.Add(file);
+				}
+			}
+
+			FileHelper.MoveFiles(filesPath, Setting.GamesPath);
+		}
+
+		await _settingService.UpdateSetting(Setting);
+
+		toastService.ShowSuccess("Settings updated");
 	}
 
 }

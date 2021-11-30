@@ -48,6 +48,9 @@ namespace RetroClient.Migrations
                     b.Property<string>("DownloadUrl")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("FileExtension")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("ImageUrl")
                         .HasColumnType("TEXT");
 

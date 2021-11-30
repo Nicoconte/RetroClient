@@ -13,5 +13,27 @@ namespace RetroClient.Helpers
 			File.Move(oldName, newName);
 			File.Delete(oldName);
 		}
+
+		public static void MoveFiles(List<string> filesPath, string newPath)
+		{
+			try 
+			{
+				foreach (var path in filesPath)
+				{
+					string fullNewPath = $"{newPath}/{Path.GetFileName(path)}";
+
+					File.Move(path, fullNewPath);
+
+					File.Delete(path);
+				}
+			}
+			catch(Exception ex)
+			{
+				Console.WriteLine(ex.Message);
+				Console.WriteLine(ex.InnerException);
+				Console.WriteLine(ex.StackTrace);
+			}
+
+		}
 	}
 }

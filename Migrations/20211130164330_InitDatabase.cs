@@ -31,6 +31,7 @@ namespace RetroClient.Migrations
                     SourceUrl = table.Column<string>(type: "TEXT", nullable: true),
                     ImageUrl = table.Column<string>(type: "TEXT", nullable: true),
                     Active = table.Column<bool>(type: "INTEGER", nullable: false),
+                    FileExtension = table.Column<string>(type: "TEXT", nullable: true),
                     CreatedAt = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>

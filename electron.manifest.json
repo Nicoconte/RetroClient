@@ -5,8 +5,8 @@
   },
   "name": "RetroClient",
   "author": "",
-  "singleInstance": false,
-  "environment": "Production",
+  "singleInstance": true,
+  "environment": "Development",
   "build": {
     "appId": "com.RetroClient.app",
     "productName": "RetroClient",

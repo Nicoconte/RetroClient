@@ -7,3 +7,18 @@
 .game-library-list-container::-webkit-scrollbar {
 	display: none;
 }
+
+
+.game-library-info {
+	height:40px;
+	display:flex;
+	justify-content:flex-start;
+	align-items:center;
+}
+
+
+.game-library-core-btn button {
+	border: 1px solid black;
+	background-color: transparent;
+	margin-left:35px;
+}

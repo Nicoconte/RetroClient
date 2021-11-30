@@ -3,17 +3,34 @@
 @using RetroClient.Data;
 @using RetroClient.Models;
 
+@using Blazored.Modal;
+
 @inject ApplicationDbContext context;
 
 
 
 <div class="game-library-list-container container">
 
-	<div class="row">
-		<div class="game-library-card-search-input w-75 h-100">
+
+	<div class="row" style="margin-top:15px;">
+		<div class="game-library-core-info w-100 h-100 d-flex flex-row">
+			<div class="game-library-core-btn h-100 w-100 d-flex justify-content-start align-content-center">
+				<button @onclick="@(() => ShowCoreSelector(Setting))" class="btn">
+					Select Core
+					<i class="fa fa-search-plus ml-1"></i>
+				</button>
+				<span class="ml-4 mt-1" style="font-size:20px; font-weight:500;">
+					Core: @SelectedCore
+				</span>
+			</div>
+		</div>
+	</div>
+
+	<div class="row" style="margin-top:15px;">
+		<div class="game-library-card-search-input w-50 h-100">
 			<GameSearchInput OnGameFilterCallback="RefreshGameListByName" />
 		</div>
-		<div class="game-library-card-filter-input w-25 h-100">
+		<div class="game-library-card-filter-input w-50 h-100">
 			<GameFilter Filters="Platforms" OnGameFilterCallback="RefreshGameListByPlatform" />
 		</div>
 	</div>
@@ -27,7 +44,7 @@
 		{
 			@foreach (var game in Games)
 			{
-				<GameLibraryCard CurrentGameName="@game.Name" Game="@game" OnDeleteGameCallback="RefreshGameList" />
+				<GameLibraryCard CurrentGameName="@game.Name" Game="@game" RetroArchCore="@SelectedCore" OnDeleteGameCallback="RefreshGameList" />
 			}
 		}
 	</div>
@@ -38,19 +55,32 @@
 </div>
 
 
+
 @code {
 
 	public List<VideoGame> Games { get; set; } = new List<VideoGame>();
 
 	public List<string> Platforms { get; set; } = new List<string>();
 
-	private VideoGameService gameService;
+	public string SelectedCore { get; set; } = "No selected";
+
+	public Setting Setting { get; set; }
+
+	private VideoGameService _gameService;
+	private SettingService _settingService;
+
+	[Inject]
+	[CascadingParameter]
+	public IModalService Modal { get; set; }
 
 	protected override void OnInitialized()
 	{
-		gameService = new VideoGameService(context);
+		_settingService = new SettingService(context);
+		Setting = _settingService.ListSettings().Result.FirstOrDefault();
 
-		Games = gameService.ListGames().Result.ToList().Where(g => g.Active == true).ToList();
+		_gameService = new VideoGameService(context);
+
+		Games = _gameService.ListGames().Result.ToList().Where(g => g.Active == true).ToList();
 
 		Games.ForEach(g =>
 		{
@@ -63,14 +93,49 @@
 	}
 
 
+	private async void ShowCoreSelector(Setting setting)
+	{
+		try
+		{
+
+			var options = new ModalOptions()
+			{
+				Animation = ModalAnimation.FadeInOut(0.3)
+			};
+
+			var parameters = new ModalParameters();
+			parameters.Add(nameof(Setting), setting);
+
+			var modal = Modal.Show<RetroarchCoreModal>($"Select Core", parameters, options);
+			var result = await modal.Result;
+
+			Console.WriteLine(result);
+
+			if (!result.Cancelled)
+			{
+				SelectedCore = (string)result.Data;
+
+				StateHasChanged();
+			}
+
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.Message);
+			Console.WriteLine(ex.StackTrace);
+			Console.WriteLine(ex.InnerException);
+		}
+
+	}
+
 	public void RefreshGameList()
 	{
-		Games = gameService.ListGames().Result.ToList().Where(g => g.Active == true).ToList();
+		Games = _gameService.ListGames().Result.ToList().Where(g => g.Active == true).ToList();
 	}
 
 	public void RefreshGameListByName(string name)
 	{
-		Games = gameService.ListGames().Result.ToList().Where(g => g.Name.Contains(name) && g.Active == true).ToList();
+		Games = _gameService.ListGames().Result.ToList().Where(g => g.Name.Contains(name) && g.Active == true).ToList();
 	}
 
 	public void RefreshGameListByPlatform(string platform)
@@ -82,7 +147,7 @@
 			return;
 		}
 
-		Games = gameService.ListGames().Result.ToList().Where(g => g.Platform == platform && g.Active == true).ToList();
+		Games = _gameService.ListGames().Result.ToList().Where(g => g.Platform == platform && g.Active == true).ToList();
 	}
 
 }

@@ -1,0 +1,56 @@
+﻿
+@using RetroClient.Models
+@using RetroClient.Data;
+@using RetroClient.Services;
+
+@using System.IO;
+
+@inject ApplicationDbContext context;
+
+<div class="simple-form" style="width:575px;height:300px;">
+
+	<div class="retroarch-core-modal-table h-75 w-100" style="overflow: scroll;">
+		<table class="table table-striped">
+			@foreach (var core in Cores)
+			{
+				@if (core.EndsWith(".dll"))
+				{
+					<tr>
+						<td>
+							@Path.GetFileName(core)
+						</td>
+						<td>
+							<input type="radio" class="form-control" name="name" @onchange="(e) => SelectedCoreInModal = (string)e.Value" value="@Path.GetFileName(core)" />
+						</td>
+					</tr>
+				}
+
+			}
+		</table>
+	</div>
+
+	<button @onclick="GetCore" class="btn btn-outline-success mt-5">Use Core <i class="fa fa-floppy-o ml-1"></i></button>
+</div>
+
+@code {
+
+	[CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
+
+	[Parameter] public Setting Setting { get; set; }
+
+	public string SelectedCoreInModal { get; set; }
+
+	List<string> Cores { get; set; }
+
+	protected override void OnInitialized()
+	{
+		Cores = Directory.GetFiles(Setting.RetroArchCorePath).ToList();
+	}
+
+	async void GetCore()
+	{
+		Console.WriteLine(SelectedCoreInModal);
+		await ModalInstance.Close(ModalResult.Ok<string>(SelectedCoreInModal));
+	}
+
+}

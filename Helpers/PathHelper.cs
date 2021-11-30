@@ -11,5 +11,6 @@ namespace RetroClient.Helpers
 	{
 		public static string ROOT_PATH = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 		public static string OUTPUT_PATH = ROOT_PATH + "/Output";
-	}
+    }
+
 }

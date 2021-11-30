@@ -35,7 +35,7 @@
 					<button title="Download" @onclick="() => RemoveGame(Game.Id, Game.Name)" class="btn btn-sm btn-outline-danger mr-2">
 						<i class='fa fa-trash'></i>
 					</button>
-					<button title="Download" class="btn btn-sm btn-outline-success mr-3">
+					<button title="Play game" @onclick="() => PlayGame()" class="btn btn-sm btn-outline-success mr-3">
 						<i class='fa fa-play'></i>
 					</button>
 				</div>
@@ -53,13 +53,19 @@
 
 @code {
 
-	[Parameter] public EventCallback OnDeleteGameCallback { get; set; }
+	[Parameter]
+	public EventCallback OnDeleteGameCallback { get; set; }
+
+	[Parameter]
+	public string RetroArchCore { get; set; }
 
 	[Parameter]
 	public VideoGame Game { get; set; }
 
 	[Parameter]
 	public string CurrentGameName { get; set; }
+
+	private string _fileExtension { get; set; }
 
 	[Inject]
 	[CascadingParameter]
@@ -72,17 +78,36 @@
 
 	private VideoGameService _gameService { get; set; }
 	private SettingService _settingService { get; set; }
+	private RetroarchService _retroarchService { get; set; }
 
-	private Setting _userSetting { get; set; }
+	private Setting _setting { get; set; }
 
 	protected override void OnInitialized()
 	{
 		_gameService = new VideoGameService(context);
 		_settingService = new SettingService(context);
+		_retroarchService = new RetroarchService();
 
-		_userSetting = _settingService.ListSettings().Result.FirstOrDefault();
+		_setting = _settingService.ListSettings().Result.FirstOrDefault();
+
+		_fileExtension = Game.FileExtension;
 	}
 
+
+	public async void PlayGame()
+	{
+
+		if (RetroArchCore == "No selected" || string.IsNullOrEmpty(RetroArchCore))
+		{
+			toastService.ShowWarning("You must select a core before!");
+
+			return;
+		}
+
+		toastService.ShowInfo($"RetroArch is starting {CurrentGameName}. It can take a while :)");
+
+		await _retroarchService.StartGame(_setting, RetroArchCore, $"{CurrentGameName}.{_fileExtension}");
+	}
 
 	private async Task RemoveGame(string id, string name)
 	{
@@ -93,7 +118,7 @@
 
 		toastService.ShowSuccess($"{name} has been deleted successfully");
 
-		File.Delete($"{_userSetting.GamesPath}{Game.Name}.zip");
+		File.Delete($"{_setting.GamesPath}{Game.Name}.{_fileExtension}");
 
 		await OnDeleteGameCallback.InvokeAsync();
 	}
@@ -128,8 +153,8 @@
 				Game = (VideoGame)result.Data;
 
 				//Reemplazamos el archivo viejo con el nuevo
-				var oldGame = $"{_userSetting.GamesPath}{CurrentGameName}.zip";
-				var newGame = $"{_userSetting.GamesPath}{Game.Name}.zip";
+				var oldGame = $"{_setting.GamesPath}{CurrentGameName}.{_fileExtension}";
+				var newGame = $"{_setting.GamesPath}{Game.Name}.{_fileExtension}";
 
 				FileHelper.ReplaceFilename(oldGame, newGame);
 

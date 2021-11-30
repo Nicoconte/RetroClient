@@ -12,11 +12,11 @@
 }
 
 .game-search-input input {
-    width: 40%;
+    width: 55.3%;
     height: 40px;
     border:1px solid black;
     border-radius: 5px;
-    margin-left: 35px;
+    margin-left: 37px;
     margin-top: 15px;
-    padding: 1px 1px;
+    padding: 0px 15px;
 }

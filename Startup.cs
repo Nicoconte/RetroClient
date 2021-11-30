@@ -34,6 +34,8 @@ namespace RetroClient
 				AutoHideMenuBar = true
 			});
 
+			window.WebContents.OpenDevTools();
+
 			window.OnClosed += () => {
 				Electron.App.Quit();
 			};
@@ -43,7 +45,6 @@ namespace RetroClient
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
 		{
-
 			services.AddBlazoredModal();
 			services.AddBlazoredToast();
 
@@ -56,9 +57,8 @@ namespace RetroClient
 
 			if (HybridSupport.IsElectronActive)
 			{
-				CreateWindow();
+				Task.Run(() => CreateWindow());
 			}
-
 		}
 
 		// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

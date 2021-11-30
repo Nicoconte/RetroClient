@@ -56,14 +56,20 @@
 	public IModalService Modal { get; set; }
 
 	public string ProgressBarId { get; set; } = $"game-card-bar-{Guid.NewGuid().ToString()}";
+	public Setting Setting { get; set; }
+
 
 	private WebClient _client = new WebClient();
 
 	private VideoGameService _gameService { get; set; }
+	private SettingService _settingService { get; set; }
 
 	protected override void OnInitialized()
 	{
 		_gameService = new VideoGameService(context);
+		_settingService = new SettingService(context);
+
+		Setting = _settingService.ListSettings().Result.FirstOrDefault();
 	}
 
 	private string ParseName(string name)
@@ -71,13 +77,14 @@
 		return name.Length > 40 ? name.Substring(0, 40).TrimEnd().TrimStart() : name.TrimEnd().TrimStart();
 	}
 
+	private void CancelDownload()
+	{
+		Task.Run(() => _client.CancelAsync());
+	}
 
 	private async void DownloadGame(string url, string gameName)
 	{
 		toastService.ShowInfo($"Starting download. Game: {gameName} ", "");
-
-		var filename = $"{gameName}.zip";
-		var outputPath = $"{PathHelper.OUTPUT_PATH}/Games/{filename}";
 
 		try
 		{
@@ -102,7 +109,7 @@
 			HttpWebResponse res2 = (HttpWebResponse)req2.GetResponse();
 
 
-			//Third request to Http 162.192.etc.... (Server that contain the game)
+			//Third request to Http 162.192.etc.... (Server that contain the game)z
 			Console.WriteLine($"\nThird Call to {res2.Headers["Location"]}");
 			HttpWebRequest req3 = (HttpWebRequest)WebRequest.Create(res2.Headers["Location"]);
 			req3.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36");
@@ -112,21 +119,33 @@
 			HttpWebResponse res3 = (HttpWebResponse)req3.GetResponse();
 
 
+			var fileLocationSplited = res3.Headers["Location"].Split('.');
+			var fileExtension = fileLocationSplited[fileLocationSplited.Length - 1];
+
+			var filename = $"{gameName}.{fileExtension}";
+			var outputPath = $"{Setting.GamesPath}{filename}";
+
 			//Finally we download the game by calling the server where the game is stored
 			Console.WriteLine($"\nLast call to {res3.Headers["Location"]}");
+			_client.Headers.Add("Accept: text/html, application/xhtml+xml, */*");
 			_client.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36");
 			_client.Headers.Add("cookie", "refexception=1");
 
 			_client.DownloadProgressChanged += (s, e) =>
 			{
+
 				jsRuntime.InvokeVoidAsync("increaseProgressBar", new object[] { ProgressBarId, e.ProgressPercentage });
 				Console.WriteLine("Percentage: " + e.ProgressPercentage + "%");
 			};
 
 			_client.DownloadFileCompleted += (s, e) =>
 			{
+
 				toastService.ShowSuccess($"{gameName} has been downloaded successfully");
+				
 				Game.Active = true;
+				Game.FileExtension = fileExtension;
+
 				_gameService.UpdateGame(Game);
 			};
 
@@ -136,6 +155,9 @@
 		catch (Exception ex)
 		{
 			toastService.ShowError(ex.Message);
+			Console.WriteLine(ex.Message);
+			Console.WriteLine(ex.InnerException);
+			Console.WriteLine(ex.StackTrace);
 		}
 
 	}
