@@ -34,8 +34,6 @@ namespace RetroClient
 				AutoHideMenuBar = true
 			});
 
-			window.WebContents.OpenDevTools();
-
 			window.OnClosed += () => {
 				Electron.App.Quit();
 			};

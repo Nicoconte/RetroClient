@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.31729.503
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroClient", "RetroClient.csproj", "{6EF53922-B6F6-4E86-A39C-259291476A87}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RetroClientCliTools", "..\RetroClientCliTools\RetroClientCliTools.csproj", "{ED3625E9-7866-4049-9AF8-4D3099623D60}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{6EF53922-B6F6-4E86-A39C-259291476A87}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6EF53922-B6F6-4E86-A39C-259291476A87}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6EF53922-B6F6-4E86-A39C-259291476A87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ED3625E9-7866-4049-9AF8-4D3099623D60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED3625E9-7866-4049-9AF8-4D3099623D60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED3625E9-7866-4049-9AF8-4D3099623D60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED3625E9-7866-4049-9AF8-4D3099623D60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

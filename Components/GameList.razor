@@ -2,6 +2,8 @@
 @using RetroClient.Data;
 @using RetroClient.Models;
 
+@using System.Threading; 
+
 @inject ApplicationDbContext context;
 
 <div class="game-list-container container">
@@ -13,24 +15,39 @@
 		<div class="game-card-filter-input w-50 h-100">
 			<GameFilter Filters="Platforms" OnGameFilterCallback="RefreshGameListByPlatform" />
 		</div>
-	</div>	
-
-	<div class="row">
-		@if (Games.Count <= 0)
-		{
-			<h3 class="ml-lg-5 mt-5">There no files <i class="fa fa-exclamation-triangle"></i></h3>
-		}
-		else
-		{
-			@foreach (var game in Games)
-			{
-				<GameCard Game="@game" OnDeleteGameCallback="RefreshGameList"/>
-			}
-		}
 	</div>
 
-	<br />
-	<br />
+	@if (IsLoading)
+	{
+		<LoadingIndicator />
+	}
+	else
+	{
+		<div class="row" style="height:auto;">
+
+			@if (Games.Count <= 0)
+			{
+				<h3 class="ml-lg-5 mt-5">There no files <i class="fa fa-exclamation-triangle"></i></h3>
+			}
+			else
+			{
+				@foreach (var game in GamesLoaded)
+				{
+					<GameCard Game="@game" />
+				}
+			}
+
+			@if (ShouldShowButton)
+			{
+				<button class="btn btn-outline-primary mt-5" @onclick="() => LoadGames()" style="width:95%;margin-left:35px;">Load more</button>
+			}
+
+		</div>
+	
+		<div class="mb-3">
+			<br />
+		</div>
+	}
 
 </div>
 
@@ -39,16 +56,48 @@
 
 	public List<VideoGame> Games { get; set; } = new List<VideoGame>();
 
+	public List<VideoGame> GamesLoaded { get; set; } = new List<VideoGame>();
+
 	public List<string> Platforms { get; set; } = new List<string>();
+
+	public bool ShouldShowButton = true;
+
+	public bool IsLoading = true;
 
 	private VideoGameService gameService;
 
-	protected override void OnInitialized()
+	private int _count = 6;
+	private int _from = 0;
+
+	private int _filterCount = 0;
+
+	protected async override void OnInitialized()
 	{
+		Console.WriteLine("Start at " + DateTime.Now.ToString());
+
 		gameService = new VideoGameService(context);
 
-		Games = gameService.ListGames().Result.ToList();
+		var GamesAsync = gameService.ListGames();
 
+		if (GamesAsync.IsCompleted)
+		{
+			Games = GamesAsync.Result.ToList();
+
+			Console.WriteLine("Cantidad " + Games.Count);
+
+			LoadGames();
+
+			InitializePlatform();
+
+			IsLoading = false;
+		}
+
+		Console.WriteLine("End at " + DateTime.Now.ToString());
+
+	}
+
+	public void InitializePlatform()
+	{
 		Games.ForEach(g =>
 		{
 			if (!Platforms.Contains(g.Platform))
@@ -56,30 +105,95 @@
 				Platforms.Add(g.Platform);
 			}
 		});
-
 	}
 
 
-	public void RefreshGameList()
+	public void RestartGamesList()
 	{
-		Games = gameService.ListGames().Result.ToList().Take(50).ToList();
+		_count = 6;
+		_from = 0;
+
+		ShouldShowButton = true;
+
+		Games = null;
+		Games = gameService.ListGames().Result.ToList();
+
+		GamesLoaded = null;
+		GamesLoaded = new List<VideoGame>();
+
+		LoadGames();
+
+		Console.WriteLine("Show button " + ShouldShowButton);
+	}
+
+	public void LoadGames()
+	{
+		IsLoading = true;
+
+		_from = _from > Games.Count ? Games.Count : _from;
+
+		var partial = Games.GetRange(_from, _count).ToList();
+
+		GamesLoaded.AddRange(partial);
+
+		_from += _count;
+
+		if (_from >= Games.Count)
+		{
+			Console.WriteLine("llegue");
+			ShouldShowButton = false;
+			return;
+		}
+
+		IsLoading = false;
 	}
 
 	public void RefreshGameListByName(string name)
 	{
-		Games = gameService.ListGames().Result.ToList().Where(g => g.Name.ToLower().Contains(name.ToLower())).ToList();
+
+		RestartGamesList();
+
+		var partOfGamesWithFilter = Games
+			.Where(g => g.Name.ToLower().Contains(name.ToLower()))
+			.ToList(); //We only take the first 20 results. Otherwise, the application will freeze for seconds
+
+		Games = null;
+		Games = partOfGamesWithFilter;
+
+		GamesLoaded = null;
+		GamesLoaded = new List<VideoGame>();
+
+		LoadGames();
+
+		ShouldShowButton = true;
 	}
 
 	public void RefreshGameListByPlatform(string platform)
 	{
+		RestartGamesList();
+
 		if (platform == "all")
 		{
-			RefreshGameList();
-
 			return;
 		}
 
-		Games = gameService.ListGames().Result.ToList().Where(g => g.Platform == platform).ToList();
+		ShouldShowButton = true;
+
+		var partOfGamesWithFilter = Games
+			.Where(g => g.Platform == platform)
+			.ToList();
+
+		GamesLoaded = null;
+		GamesLoaded = new List<VideoGame>();
+
+		Games = null;
+		Games = partOfGamesWithFilter;
+
+		Console.WriteLine("Cantidad " + Games.Count);
+
+		_from = 0;
+
+		LoadGames();
 	}
 
 }
