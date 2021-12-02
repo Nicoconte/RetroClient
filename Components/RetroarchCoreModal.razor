@@ -7,10 +7,10 @@
 
 @inject ApplicationDbContext context;
 
-<div class="simple-form" style="width:575px;height:300px;">
+<div class="simple-form" style="width:575px;height:310px;">
 
-	<div class="retroarch-core-modal-table h-75 w-100" style="overflow: scroll;">
-		<table class="table table-striped">
+	<div class="retroarch-core-modal-table w-100" style="overflow: scroll; height:77%;">
+		<table class="table table-hover border-bottom">
 			@foreach (var core in Cores)
 			{
 				@if (core.EndsWith(".dll"))
@@ -29,7 +29,7 @@
 		</table>
 	</div>
 
-	<button @onclick="GetCore" class="btn btn-outline-success mt-5">Use Core <i class="fa fa-floppy-o ml-1"></i></button>
+	<button @onclick="GetCore" class="btn btn-outline-success mt-4">Use Core <i class="fa fa-floppy-o ml-1"></i></button>
 </div>
 
 @code {

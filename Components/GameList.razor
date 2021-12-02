@@ -17,24 +17,17 @@
 		</div>
 	</div>
 
-	@if (IsLoading)
-	{
-		<LoadingIndicator />
-	}
-	else
-	{
-		<div class="row" style="height:auto;">
+	<div class="row" style="height:auto;">
 
-			@if (Games.Count <= 0)
+		@if (GamesLoaded.Count <= 0)
+		{
+			<h3 class="ml-lg-5 mt-5">There no files <i class="fa fa-exclamation-triangle"></i></h3>
+		}
+		else
+		{
+			@foreach (var game in GamesLoaded)
 			{
-				<h3 class="ml-lg-5 mt-5">There no files <i class="fa fa-exclamation-triangle"></i></h3>
-			}
-			else
-			{
-				@foreach (var game in GamesLoaded)
-				{
-					<GameCard Game="@game" />
-				}
+				<GameCard Game="@game" />
 			}
 
 			@if (ShouldShowButton)
@@ -42,12 +35,13 @@
 				<button class="btn btn-outline-primary mt-5" @onclick="() => LoadGames()" style="width:95%;margin-left:35px;">Load more</button>
 			}
 
-		</div>
-	
-		<div class="mb-3">
-			<br />
-		</div>
-	}
+		}
+
+	</div>
+
+	<div class="mb-3">
+		<br />
+	</div>
 
 </div>
 
@@ -62,14 +56,10 @@
 
 	public bool ShouldShowButton = true;
 
-	public bool IsLoading = true;
-
 	private VideoGameService gameService;
 
 	private int _count = 6;
 	private int _from = 0;
-
-	private int _filterCount = 0;
 
 	protected async override void OnInitialized()
 	{
@@ -88,8 +78,6 @@
 			LoadGames();
 
 			InitializePlatform();
-
-			IsLoading = false;
 		}
 
 		Console.WriteLine("End at " + DateTime.Now.ToString());
@@ -128,9 +116,9 @@
 
 	public void LoadGames()
 	{
-		IsLoading = true;
+		_count = _from + _count > Games.Count ? Games.Count - _from : _count;
 
-		_from = _from > Games.Count ? Games.Count : _from;
+		Console.WriteLine($"Cantidad {Games.Count} - Desde {_from} - Cantidad {_count}");
 
 		var partial = Games.GetRange(_from, _count).ToList();
 
@@ -138,14 +126,12 @@
 
 		_from += _count;
 
-		if (_from >= Games.Count)
+		if (_from >= Games.Count || _count >= Games.Count)
 		{
-			Console.WriteLine("llegue");
 			ShouldShowButton = false;
 			return;
 		}
 
-		IsLoading = false;
 	}
 
 	public void RefreshGameListByName(string name)
@@ -165,6 +151,8 @@
 
 		LoadGames();
 
+		_from = 0;
+
 		ShouldShowButton = true;
 	}
 
@@ -182,9 +170,6 @@
 		var partOfGamesWithFilter = Games
 			.Where(g => g.Platform == platform)
 			.ToList();
-
-		GamesLoaded = null;
-		GamesLoaded = new List<VideoGame>();
 
 		Games = null;
 		Games = partOfGamesWithFilter;

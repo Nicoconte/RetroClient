@@ -11,32 +11,23 @@
 
 <div class="game-library-list-container container">
 
-
-	<div class="row" style="margin-top:15px;">
-		<div class="game-library-core-info w-100 h-100 d-flex flex-row">
-			<div class="game-library-core-btn h-100 w-100 d-flex justify-content-start align-content-center">
-				<button @onclick="@(() => ShowCoreSelector(Setting))" class="btn">
-					Select Core
-					<i class="fa fa-search-plus ml-1"></i>
+	<div class="row">
+		<div class="game-library-core-info w-50 h-100 d-flex flex-row">
+			<div class="game-library-core-btn h-100 w-100 mt-3 d-flex justify-content-start align-content-center">
+				<button @onclick="@(() => ShowCoreSelector(Setting))" class="btn" style="width:55.5%;">
+					@SelectedCore
+					<i class="fa fa-connectdevelop ml-1"></i>
 				</button>
-				<span class="ml-4 mt-1" style="font-size:20px; font-weight:500;">
-					Core: @SelectedCore
-				</span>
 			</div>
-		</div>
-	</div>
-
-	<div class="row" style="margin-top:15px;">
-		<div class="game-library-card-search-input w-50 h-100">
-			<GameSearchInput OnGameFilterCallback="RefreshGameListByName" />
 		</div>
 		<div class="game-library-card-filter-input w-50 h-100">
 			<GameFilter Filters="Platforms" OnGameFilterCallback="RefreshGameListByPlatform" />
 		</div>
 	</div>
 
-	<div class="row">
-		@if (Games.Count <= 0)
+	<div class="row mt-3" style="height:auto;">
+
+		@if (GamesLoaded.Count <= 0)
 		{
 			<h3 class="ml-lg-5 mt-5">There no files <i class="fa fa-exclamation-triangle"></i></h3>
 		}
@@ -44,13 +35,13 @@
 		{
 			@foreach (var game in GamesLoaded)
 			{
-				<GameLibraryCard Game="@game" CurrentGameName="@game.Name" RetroArchCore="@SelectedCore" OnDeleteGameCallback="RestartGamesList" />
+				<GameLibraryCard CurrentGameName="@game.Name" OnDeleteGameCallback="RestartGamesList" Game="@game" RetroArchCore="@SelectedCore" />
 			}
-		}
-
-		@if (ShouldShowButton)
-		{
-			<button class="btn btn-outline-primary mt-5" @onclick="() => LoadGames()" style="width:95%;margin-left:35px;">Load more</button>
+			
+			@if (ShouldShowButton)
+			{
+				<button class="btn btn-outline-primary mt-5" @onclick="() => LoadGames()" style="width:95%;margin-left:35px;">Load more</button>
+			}
 		}
 
 	</div>
@@ -66,11 +57,11 @@
 
 	public List<VideoGame> Games { get; set; } = new List<VideoGame>();
 
-	public List<VideoGame> GamesLoaded { get; set; } = new List<VideoGame>();
+	public List<VideoGame> GamesLoaded { get; set; } = new List<VideoGame>(); 
 
 	public List<string> Platforms { get; set; } = new List<string>();
 
-	public string SelectedCore { get; set; } = "No selected";
+	public string SelectedCore { get; set; } = "Select Core";
 
 	public bool ShouldShowButton = true;
 
@@ -83,8 +74,6 @@
 	private int _count = 6;
 	private int _from = 0;
 
-	public bool IsLoading = false;
-
 	[Inject]
 	[CascadingParameter]
 	public IModalService Modal { get; set; }
@@ -93,6 +82,8 @@
 	{
 		_settingService = new SettingService(context);
 		Setting = _settingService.ListSettings().Result.FirstOrDefault();
+
+		Console.WriteLine("Start at " + DateTime.Now.ToString());
 
 		_gameService = new VideoGameService(context);
 
@@ -107,9 +98,10 @@
 			LoadGames();
 
 			InitializePlatform();
-
-			IsLoading = false;
 		}
+
+		Console.WriteLine("End at " + DateTime.Now.ToString());
+
 	}
 
 	public void InitializePlatform()
@@ -131,7 +123,7 @@
 		ShouldShowButton = true;
 
 		Games = null;
-		Games = _gameService.ListGames().Result.ToList();
+		Games = _gameService.ListGames().Result.ToList().Where(g => g.Active).ToList();
 
 		GamesLoaded = null;
 		GamesLoaded = new List<VideoGame>();
@@ -143,48 +135,22 @@
 
 	public void LoadGames()
 	{
-		IsLoading = true;
+		_count = _from + _count > Games.Count ? Games.Count - _from : _count;
 
-		_from = _from > Games.Count ? Games.Count : _from;
-
-		_count = _count > Games.Count ? Games.Count : _count;
-
-		var partial = Games.GetRange(_from, _count).ToList().Where(g => g.Active).ToList();
+		var partial = Games.GetRange(_from, _count).ToList();
 
 		GamesLoaded.AddRange(partial);
 
 		_from += _count;
 
-		if (_from >= Games.Count)
+		if (_from >= Games.Count || _count >= Games.Count)
 		{
-			Console.WriteLine("llegue");
 			ShouldShowButton = false;
 			return;
 		}
 
-		IsLoading = false;
+		StateHasChanged();
 	}
-
-	public void RefreshGameListByName(string name)
-	{
-
-		RestartGamesList();
-
-		var partOfGamesWithFilter = Games
-			.Where(g => g.Name.ToLower().Contains(name.ToLower()) && g.Active)
-			.ToList(); //We only take the first 20 results. Otherwise, the application will freeze for seconds
-
-		Games = null;
-		Games = partOfGamesWithFilter;
-
-		GamesLoaded = null;
-		GamesLoaded = new List<VideoGame>();
-
-		LoadGames();
-
-		ShouldShowButton = true;
-	}
-
 
 	public void RefreshGameListByPlatform(string platform)
 	{
@@ -198,7 +164,7 @@
 		ShouldShowButton = true;
 
 		var partOfGamesWithFilter = Games
-			.Where(g => g.Platform == platform && g.Active)
+			.Where(g => g.Platform == platform)
 			.ToList();
 
 		GamesLoaded = null;
@@ -207,7 +173,6 @@
 		Games = null;
 		Games = partOfGamesWithFilter;
 
-		Console.WriteLine("Cantidad " + Games.Count);
 
 		_from = 0;
 

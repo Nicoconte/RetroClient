@@ -1,3 +1,10 @@
 ﻿.retroarch-core-modal-table::-webkit-scrollbar {
-	display: none;
+	display:none;
+}
+
+.retroarch-core-modal-table input {
+	background-image: none !important;
+	outline: none !important;
+	-webkit-box-shadow: none !important;
+	box-shadow: none !important;
 }
