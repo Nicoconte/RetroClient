@@ -1,10 +1,11 @@
-﻿
-@using RetroClient.Models
+﻿@using RetroClient.Models
 @using RetroClient.Data;
 @using RetroClient.Services;
 
 @using System.IO;
 
+
+@inject IToastService toastService;
 @inject ApplicationDbContext context;
 
 <div class="simple-form" style="width:575px;height:310px;">
@@ -20,7 +21,8 @@
 							@Path.GetFileName(core)
 						</td>
 						<td>
-							<input type="radio" class="form-control" name="name" @onchange="(e) => SelectedCoreInModal = (string)e.Value" value="@Path.GetFileName(core)" />
+							<input type="radio" class="form-control" name="name"
+						@onchange="(e) => SelectedCoreInModal = (string)e.Value" value="@Path.GetFileName(core)" />
 						</td>
 					</tr>
 				}
@@ -29,14 +31,18 @@
 		</table>
 	</div>
 
-	<button @onclick="GetCore" class="btn btn-outline-success mt-4">Use Core <i class="fa fa-floppy-o ml-1"></i></button>
+	<button @onclick="GetCore" class="btn btn-outline-success mt-4">Done <i class="fa fa-floppy-o ml-1"></i></button>
 </div>
 
 @code {
 
 	[CascadingParameter] BlazoredModalInstance ModalInstance { get; set; }
 
-	[Parameter] public Setting Setting { get; set; }
+	[Parameter]
+	public Setting Setting { get; set; }
+
+	[Parameter]
+	public VideoGame VideoGame { get; set; }
 
 	public string SelectedCoreInModal { get; set; }
 
@@ -49,8 +55,27 @@
 
 	async void GetCore()
 	{
-		Console.WriteLine(SelectedCoreInModal);
-		await ModalInstance.Close(ModalResult.Ok<string>(SelectedCoreInModal));
+		var core = SelectedCoreInModal;
+		
+		if (core == "No selected" || core == "Select Core" || string.IsNullOrEmpty(core))
+		{
+			toastService.ShowWarning("You must select a core before!");
+
+			return;
+		}
+
+		await ModalInstance.Close(ModalResult.Ok<string>(string.Empty));
+
+		StateHasChanged();
+
+		var task = RetroArchService.StartGame(Setting, core, $"{VideoGame.Name}.{VideoGame.FileExtension}");
+
+		if (task.Exception.Message != null)
+		{
+			toastService.ShowError(task.Exception.Message);
+			return;
+		}
+
 	}
 
 }

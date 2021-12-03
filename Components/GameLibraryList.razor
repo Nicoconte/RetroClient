@@ -13,10 +13,10 @@
 
 	<div class="row">
 		<div class="game-library-core-info w-50 h-100 d-flex flex-row">
-			<div class="game-library-core-btn h-100 w-100 mt-3 d-flex justify-content-start align-content-center">
-				<button @onclick="@(() => ShowCoreSelector(Setting))" class="btn" style="width:55.5%;">
-					@SelectedCore
-					<i class="fa fa-connectdevelop ml-1"></i>
+			<div class="game-library-core-btn h-100 w-100 mt-2 d-flex justify-content-start align-content-center flex-column">
+				<button @onclick="@(() => OpenRetroArch())" class="btn mt-2" style="width:55%;">
+					Open RetroArch
+					<i class="fa fa-gamepad ml-1"></i>
 				</button>
 			</div>
 		</div>
@@ -35,7 +35,7 @@
 		{
 			@foreach (var game in GamesLoaded)
 			{
-				<GameLibraryCard CurrentGameName="@game.Name" OnDeleteGameCallback="RestartGamesList" Game="@game" RetroArchCore="@SelectedCore" />
+				<GameLibraryCard CurrentGameName="@game.Name" OnDeleteGameCallback="RestartGamesList" Game="@game" />
 			}
 			
 			@if (ShouldShowButton)
@@ -57,11 +57,9 @@
 
 	public List<VideoGame> Games { get; set; } = new List<VideoGame>();
 
-	public List<VideoGame> GamesLoaded { get; set; } = new List<VideoGame>(); 
+	public List<VideoGame> GamesLoaded { get; set; } = new List<VideoGame>();
 
 	public List<string> Platforms { get; set; } = new List<string>();
-
-	public string SelectedCore { get; set; } = "Select Core";
 
 	public bool ShouldShowButton = true;
 
@@ -179,38 +177,9 @@
 		LoadGames();
 	}
 
-	private async void ShowCoreSelector(Setting setting)
+
+	public async void OpenRetroArch()
 	{
-		try
-		{
-
-			var options = new ModalOptions()
-			{
-				Animation = ModalAnimation.FadeInOut(0.3)
-			};
-
-			var parameters = new ModalParameters();
-			parameters.Add(nameof(Setting), setting);
-
-			var modal = Modal.Show<RetroarchCoreModal>($"Select Core", parameters, options);
-			var result = await modal.Result;
-
-			Console.WriteLine(result);
-
-			if (!result.Cancelled)
-			{
-				SelectedCore = (string)result.Data;
-
-				StateHasChanged();
-			}
-
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex.Message);
-			Console.WriteLine(ex.StackTrace);
-			Console.WriteLine(ex.InnerException);
-		}
-
+		RetroArchService.StartRetroArch(Setting);
 	}
 }

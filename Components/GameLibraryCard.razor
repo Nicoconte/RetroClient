@@ -10,8 +10,6 @@
 @using RetroClient.Data;
 @using RetroClient.Helpers;
 
-@using Blazored.Modal;
-
 @inject IToastService toastService;
 @inject ApplicationDbContext context;
 
@@ -28,22 +26,27 @@
 				<div class="game-card-platform">
 					<span>@Game.Platform</span>
 				</div>
-				<div class="game-card-actions"
-					<button @onclick="@(() => ShowEditGame(Game))" class="btn btn-sm mr-2 btn-outline-info">
-						<i class="fa fa-pencil"></i>
+				<div class="game-card-actions" <button @onclick="@(() => ShowEditGame(Game))"
+					class="btn btn-sm mr-2 btn-outline-info">
+					<i class="fa fa-pencil"></i>
 					</button>
-					<button title="Download" @onclick="() => RemoveGame(Game.Id, Game.Name)" class="btn btn-sm btn-outline-danger mr-2">
+					<button title="Download" @onclick="() => RemoveGame(Game.Id, Game.Name)"
+						class="btn btn-sm btn-outline-danger mr-2">
 						<i class='fa fa-trash'></i>
 					</button>
-					<button title="Play game" @onclick="() => PlayGame()" class="btn btn-sm btn-outline-success mr-3">
+					<button title="Play game" @onclick="() => ShowModalWithCores()"
+						class="btn btn-sm btn-outline-success mr-3">
 						<i class='fa fa-play'></i>
 					</button>
 				</div>
 			</div>
 		</div>
-		<div class="card-footer">
-			<span class="ml-2" style="font-size:15px;">
-				<a href="@Game.SourceUrl" target="_blank">Go to source</a>
+		<div class="card-footer d-flex flex-row">
+			<span class="ml-2 w-25" style="font-size:15px;">
+				<i class="fa fa-circle @GameStateClass"></i>
+			</span>
+			<span class="ml-2 w-75" style="font-size:15px;">
+				<a href="@Game.SourceUrl" class="" style="margin-left:90px;" target="_blank">Go to source</a>
 			</span>
 		</div>
 	</div>
@@ -57,9 +60,6 @@
 	public EventCallback OnDeleteGameCallback { get; set; }
 
 	[Parameter]
-	public string RetroArchCore { get; set; }
-
-	[Parameter]
 	public VideoGame Game { get; set; }
 
 	[Parameter]
@@ -71,6 +71,7 @@
 	[CascadingParameter]
 	public IModalService Modal { get; set; }
 
+	public string GameStateClass { get; set; } = "text-danger";
 
 	public string ProgressBarId { get; set; } = $"game-card-bar-{Guid.NewGuid().ToString()}";
 
@@ -78,35 +79,52 @@
 
 	private VideoGameService _gameService { get; set; }
 	private SettingService _settingService { get; set; }
-	private RetroarchService _retroarchService { get; set; }
 
 	private Setting _setting { get; set; }
 
 	protected override void OnInitialized()
 	{
 		_gameService = new VideoGameService(context);
+
 		_settingService = new SettingService(context);
-		_retroarchService = new RetroarchService();
 
 		_setting = _settingService.ListSettings().Result.FirstOrDefault();
 
 		_fileExtension = Game.FileExtension;
 	}
 
-
-	public async void PlayGame()
+	public async Task ShowModalWithCores()
 	{
-
-		if (RetroArchCore == "No selected" || string.IsNullOrEmpty(RetroArchCore))
+		if (Game.FileExtension == "rar")
 		{
-			toastService.ShowWarning("You must select a core before!");
+			toastService.ShowWarning("Cannot process RAR files. Open RetroArch and load it there!");
 
 			return;
 		}
 
-		toastService.ShowInfo($"RetroArch is starting {CurrentGameName}. It can take a while :)");
+		var options = new ModalOptions()
+		{
+			Animation = ModalAnimation.FadeInOut(0.3)
+		};
 
-		await _retroarchService.StartGame(_setting, RetroArchCore, $"{CurrentGameName}.{_fileExtension}");
+		var parameters = new ModalParameters();
+		parameters.Add(nameof(Setting), _setting);
+		parameters.Add(nameof(VideoGame), Game);
+
+		var modal = Modal.Show<RetroarchCoreModal>($"Select Core", parameters, options);
+		var result = await modal.Result;
+
+		modal.Close();
+
+		Console.WriteLine("Resultado : " + result.Data.ToString());
+
+		if (!result.Cancelled || string.IsNullOrEmpty(result.Data.ToString()))
+		{
+			GameStateClass = "text-success";
+			toastService.ShowInfo($"Processing {CurrentGameName}");
+			StateHasChanged(); //In case we load a game, we should tell to the component that it should re render
+		}
+		StateHasChanged();
 	}
 
 	private async Task RemoveGame(string id, string name)

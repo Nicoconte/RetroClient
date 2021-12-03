@@ -30,7 +30,7 @@ namespace RetroClient
 		{
 			var window = await Electron.WindowManager.CreateWindowAsync(new BrowserWindowOptions() {
 				Width = 1360,
-				Height = 724,
+				Height = 710,
 				AutoHideMenuBar = true
 			});
 

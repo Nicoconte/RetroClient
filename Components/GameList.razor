@@ -171,10 +171,12 @@
 			.Where(g => g.Platform == platform)
 			.ToList();
 
+		GamesLoaded = null;
+		GamesLoaded = new List<VideoGame>();
+
 		Games = null;
 		Games = partOfGamesWithFilter;
 
-		Console.WriteLine("Cantidad " + Games.Count);
 
 		_from = 0;
 

@@ -1,59 +1,87 @@
 ﻿using RetroClient.Models;
+using RetroClient.Helpers;
+
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
-using System.IO.Compression;
 using System.IO;
 
 namespace RetroClient.Services
 {
-	public class RetroarchService
-	{
+    public class RetroArchService
+    {
 
-		public async Task StartGame(Setting setting, string core, string game)
-		{
-			try
-			{
+        public static async Task StartGame(Setting setting, string core, string game)
+        {
+            Console.WriteLine($"Meanwhile rendering");
 
-				//var tempPath = "D:/GIT/_me/RetroClient/bin/Debug/net5.0/win-x64/Output/TempDir/";
+            var outputTempPath = "D:/GIT/_me/RetroClient/bin/Debug/net5.0/win-x64/Output/TempDir/";
+            var filesFromOutputPath = Directory.GetFiles(outputTempPath).ToList();
 
-				var gamePath = $"{setting.GamesPath}{game}";
+            filesFromOutputPath.ForEach(f =>
+            {
+                File.Delete(f);
+            });
 
-				//Directory.GetFiles(tempPath).ToList().ForEach(p => File.Delete(p));
+            var pathToGame = $"{setting.GamesPath}{game}";
+            var gameExtension = Path.GetExtension(pathToGame);
+
+            Console.WriteLine($"Extension: {gameExtension}");
+
+            switch (gameExtension)
+            {
+                case ".zip":
+                    await RetroArchHelper.ExtractFromZip(pathToGame, outputTempPath);
+                    break;
+
+                case ".7z":
+                    await RetroArchHelper.ExtractFrom7z(pathToGame, outputTempPath);
+                    break;
+            }
 
 
-				//ZipFile.ExtractToDirectory(gamePath, tempPath);
+            if (filesFromOutputPath.Any(f => RetroArchHelper.UnallowedExtension.Contains(Path.GetExtension(f))))
+            {
+                Console.WriteLine("che");
+                throw new Exception($"Unable to load {game}. Please open RetroArch and load it manually. Reason: Unexpecting game extension");
+            }
 
-				//var filesFromTemp = Directory.GetFiles(tempPath);
+            //TODO: Create a list with all the exceptions
+            var firstFileFromTemp = Directory.GetFiles(outputTempPath)
+                .Where(f =>
+                    RetroArchHelper.AllowedGameExtensions
+                    .Contains(Path.GetExtension(f)))
+                .FirstOrDefault();
 
-				//var flatFiles = string.Join(' ', filesFromTemp.Where(f => !f.EndsWith(".txt")));
+            Console.WriteLine($"First file {firstFileFromTemp}");
 
-				var command = $"{setting.RetroArchPath}retroarch.exe --verbose -L '{setting.RetroArchCorePath}{core}' '{gamePath}'";
+            if (firstFileFromTemp is null)
+            {
+                throw new Exception($"Cannot load files from {outputTempPath}");
+            }
 
-				Console.WriteLine(command);
+            var command = $"{setting.RetroArchPath}retroarch.exe --verbose -L '{setting.RetroArchCorePath}{core}' '{firstFileFromTemp}'";
 
-				Process cmd = new Process();
-				cmd.StartInfo.FileName = "powershell.exe";
-				cmd.StartInfo.Arguments = command;
-				cmd.StartInfo.CreateNoWindow = false;
+            await RetroArchHelper.ExecuteCommandWrapper(command);
+        }
 
-				cmd.StartInfo.RedirectStandardOutput = true;
+        public static async void StartRetroArch(Setting setting)
+        {
+            try
+            {
+                var command = $"{setting.RetroArchPath}retroarch.exe --menu --verbose";
 
-				cmd.Start();
+                await RetroArchHelper.ExecuteCommandWrapper(command);
 
-				string output = cmd.StandardOutput.ReadToEnd();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                Console.WriteLine(ex.InnerException);
+                Console.WriteLine(ex.StackTrace);
+            }
+        }
 
-				Console.WriteLine(output);
-			}
-			catch(Exception ex)
-			{
-				Console.WriteLine(ex.Message);
-				Console.WriteLine(ex.InnerException);
-				Console.WriteLine(ex.StackTrace);
-			}
-
-		}
-	}
+    }
 }
