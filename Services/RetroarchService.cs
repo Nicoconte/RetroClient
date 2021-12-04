@@ -41,7 +41,7 @@ namespace RetroClient.Services
             }
 
 
-            if (filesFromOutputPath.Any(f => RetroArchHelper.UnallowedExtension.Contains(Path.GetExtension(f))))
+            if (filesFromOutputPath.Any(f => !RetroArchHelper.AllowedGameExtensions.Contains(Path.GetExtension(f))))
             {
                 Console.WriteLine("che");
                 throw new Exception($"Unable to load {game}. Please open RetroArch and load it manually. Reason: Unexpecting game extension");

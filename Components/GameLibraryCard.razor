@@ -121,7 +121,7 @@
 		if (!result.Cancelled || string.IsNullOrEmpty(result.Data.ToString()))
 		{
 			GameStateClass = "text-success";
-			toastService.ShowInfo($"Processing {CurrentGameName}");
+			toastService.ShowInfo($"Starting {CurrentGameName}");
 			StateHasChanged(); //In case we load a game, we should tell to the component that it should re render
 		}
 		StateHasChanged();
