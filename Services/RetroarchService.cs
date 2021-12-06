@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 
 namespace RetroClient.Services
 {
@@ -14,56 +15,53 @@ namespace RetroClient.Services
 
         public static async Task StartGame(Setting setting, string core, string game)
         {
-            Console.WriteLine($"Meanwhile rendering");
-
-            var outputTempPath = "D:/GIT/_me/RetroClient/bin/Debug/net5.0/win-x64/Output/TempDir/";
-            var filesFromOutputPath = Directory.GetFiles(outputTempPath).ToList();
-
-            filesFromOutputPath.ForEach(f =>
+            Thread retroStartGameThread = new Thread(async() =>
             {
-                File.Delete(f);
+
+                var outputTempPath = setting.GamesTempPath;
+                var filesFromOutputPath = Directory.GetFiles(outputTempPath).ToList();
+
+                filesFromOutputPath.ForEach(f =>
+                {
+                    File.Delete(f);
+                });
+
+                var pathToGame = $"{setting.GamesPath}{game}";
+                var gameExtension = Path.GetExtension(pathToGame);
+
+                switch (gameExtension)
+                {
+                    case ".zip":
+                        await RetroArchHelper.ExtractFromZip(pathToGame, outputTempPath);
+                        break;
+
+                    case ".7z":
+                        await RetroArchHelper.ExtractFrom7z(pathToGame, outputTempPath);
+                        break;
+                }
+
+                //TODO: Create a list with all the exceptions
+                var firstFileFromTemp = Directory
+                    .GetFiles(outputTempPath)
+                    .FirstOrDefault(f =>
+                        RetroArchHelper.AllowedGameExtensions.Contains(Path.GetExtension(f))
+                    );
+
+                if (firstFileFromTemp is null)
+                {
+                    throw new Exception($"Unable to load {game}. Reason: Unexpecting game extension");
+                }
+
+                var command = $"{setting.RetroArchPath}retroarch.exe --verbose -L '{setting.RetroArchCorePath}{core}' '{firstFileFromTemp}'";
+
+                Console.WriteLine(command);
+
+                //We can run the retroarch execution in another thread so we dont freeze the Blazor UI thread
+                await RetroArchHelper.ExecuteCommandWrapper(command);
             });
 
-            var pathToGame = $"{setting.GamesPath}{game}";
-            var gameExtension = Path.GetExtension(pathToGame);
+            retroStartGameThread.Start();
 
-            Console.WriteLine($"Extension: {gameExtension}");
-
-            switch (gameExtension)
-            {
-                case ".zip":
-                    await RetroArchHelper.ExtractFromZip(pathToGame, outputTempPath);
-                    break;
-
-                case ".7z":
-                    await RetroArchHelper.ExtractFrom7z(pathToGame, outputTempPath);
-                    break;
-            }
-
-
-            if (filesFromOutputPath.Any(f => !RetroArchHelper.AllowedGameExtensions.Contains(Path.GetExtension(f))))
-            {
-                Console.WriteLine("che");
-                throw new Exception($"Unable to load {game}. Please open RetroArch and load it manually. Reason: Unexpecting game extension");
-            }
-
-            //TODO: Create a list with all the exceptions
-            var firstFileFromTemp = Directory.GetFiles(outputTempPath)
-                .Where(f =>
-                    RetroArchHelper.AllowedGameExtensions
-                    .Contains(Path.GetExtension(f)))
-                .FirstOrDefault();
-
-            Console.WriteLine($"First file {firstFileFromTemp}");
-
-            if (firstFileFromTemp is null)
-            {
-                throw new Exception($"Cannot load files from {outputTempPath}");
-            }
-
-            var command = $"{setting.RetroArchPath}retroarch.exe --verbose -L '{setting.RetroArchCorePath}{core}' '{firstFileFromTemp}'";
-
-            await RetroArchHelper.ExecuteCommandWrapper(command);
         }
 
         public static async void StartRetroArch(Setting setting)

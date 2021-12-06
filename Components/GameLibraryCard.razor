@@ -82,14 +82,11 @@
 
 	private Setting _setting { get; set; }
 
-	protected override void OnInitialized()
+	protected async override void OnInitialized()
 	{
 		_gameService = new VideoGameService(context);
-
 		_settingService = new SettingService(context);
-
 		_setting = _settingService.ListSettings().Result.FirstOrDefault();
-
 		_fileExtension = Game.FileExtension;
 	}
 
@@ -111,20 +108,29 @@
 		parameters.Add(nameof(Setting), _setting);
 		parameters.Add(nameof(VideoGame), Game);
 
-		var modal = Modal.Show<RetroarchCoreModal>($"Select Core", parameters, options);
+		var modal = Modal.Show<RetroarchCoreModal>($"{CurrentGameName} - {Game.Platform}", parameters, options);
 		var result = await modal.Result;
 
 		modal.Close();
 
-		Console.WriteLine("Resultado : " + result.Data.ToString());
+		Console.WriteLine("Resultado : " + result?.Data?.ToString());
 
-		if (!result.Cancelled || string.IsNullOrEmpty(result.Data.ToString()))
+		if (!result.Cancelled || !string.IsNullOrEmpty(result?.Data?.ToString()))
 		{
 			GameStateClass = "text-success";
 			toastService.ShowInfo($"Starting {CurrentGameName}");
-			StateHasChanged(); //In case we load a game, we should tell to the component that it should re render
+
+			await RetroArchHelper.ProcessListener(() =>
+			{
+				Console.WriteLine("I'm the callback dude");
+
+				toastService.ShowSuccess($"{CurrentGameName} stopped!. I hope you enjoy it :)");
+
+				GameStateClass = "text-danger";
+
+				InvokeAsync(StateHasChanged);
+			});
 		}
-		StateHasChanged();
 	}
 
 	private async Task RemoveGame(string id, string name)

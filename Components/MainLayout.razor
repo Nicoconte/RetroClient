@@ -1,6 +1,11 @@
 ﻿@inherits LayoutComponentBase
 
 @using Blazored.Toast.Configuration
+@using Blazored.LocalStorage
+
+@inject ILocalStorageService localStorage
+
+
 
 <div class="page">
 
@@ -8,8 +13,8 @@
 
     <div class="main">
         <div class="upper-bar">
-			<div class="upper-bar-text">
-				<span>@ViewDescription</span>
+            <div class="upper-bar-text">
+                <span>@ViewDescription</span>
             </div>
             <div class="upper-help-button">
                 <button class='btn'>
@@ -22,16 +27,31 @@
         </div>
     </div>
 
-    <BlazoredToasts Position="ToastPosition.BottomRight" Timeout="4" />
+    <BlazoredToasts Position="ToastPosition.BottomRight" Timeout="3" />
 
 </div>
 
 @code {
 
-	public string ViewDescription { get; set; }
+    public string ViewDescription { get; set; }
 
-	public void GetViewDescription(string description)
-	{
-		ViewDescription = description;
-	}
+    protected async override void OnInitialized()
+    {
+        ViewDescription = await localStorage.GetItemAsync<string>("view-description");
+        
+        //TODO: StateHasChanged freeze thread???
+        //In case we have a value for view description we ask to component to re render and show the value
+        if (!string.IsNullOrEmpty(ViewDescription))
+        {
+            Console.WriteLine("Is rendering? " + ViewDescription);            
+            StateHasChanged();
+        }
+
+    }
+
+    public async void GetViewDescription(string description)
+    {
+        ViewDescription = description;
+        await localStorage.SetItemAsync<string>("view-description", description);
+    }
 }

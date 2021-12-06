@@ -6,7 +6,7 @@
     </div>
 	<div class="sidebar-content-container">
 
-		<a href='/' class="btn sidebar-button-container" @onclick='() => SendDescription("")'>
+		<a href='/' class="btn sidebar-button-container" @onclick='() => SendDescription("Home")'>
 			<div class="@SidebarIconCssClass">
 				<i class='fa fa-home'></i>
 			</div>
@@ -74,7 +74,7 @@
 		ChangeSidebarClass();
 	}
 
-	public void SendDescription(string description)
+	public async void SendDescription(string description)
 	{
 		OnDescriptionChangeCallback.InvokeAsync(description);
 	}

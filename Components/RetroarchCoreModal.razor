@@ -8,30 +8,30 @@
 @inject IToastService toastService;
 @inject ApplicationDbContext context;
 
-<div class="simple-form" style="width:575px;height:310px;">
+<div class="simple-form" style="width:690px;height:430px;">
 
-	<div class="retroarch-core-modal-table w-100" style="overflow: scroll; height:77%;">
-		<table class="table table-hover border-bottom">
-			@foreach (var core in Cores)
-			{
-				@if (core.EndsWith(".dll"))
+	<div class="retroarch-core-modal-table w-100" style="height:100%;">
+		
+		<div class="w-100 d-flex justify-content-start align-items-center">
+			<h4>Click in a core and start playing!</h4>
+		</div>
+
+		<table class="table table-striped mt-4">
+			<tbody>
+				@foreach (var core in Cores)
 				{
-					<tr>
-						<td>
-							@Path.GetFileName(core)
-						</td>
-						<td>
-							<input type="radio" class="form-control" name="name"
-						@onchange="(e) => SelectedCoreInModal = (string)e.Value" value="@Path.GetFileName(core)" />
-						</td>
-					</tr>
+					@if (core.EndsWith(".dll"))
+					{
+						<tr class="retroarch-core-modal-tr" @onclick="() => PlayGame(Path.GetFileName(core))">
+							<td>
+								@Path.GetFileName(core)
+							</td>
+						</tr>
+					}
 				}
-
-			}
+			</tbody>
 		</table>
 	</div>
-
-	<button @onclick="GetCore" class="btn btn-outline-success mt-4">Done <i class="fa fa-floppy-o ml-1"></i></button>
 </div>
 
 @code {
@@ -44,8 +44,6 @@
 	[Parameter]
 	public VideoGame VideoGame { get; set; }
 
-	public string SelectedCoreInModal { get; set; }
-
 	List<string> Cores { get; set; }
 
 	protected override void OnInitialized()
@@ -53,17 +51,8 @@
 		Cores = Directory.GetFiles(Setting.RetroArchCorePath).ToList();
 	}
 
-	async void GetCore()
+	async void PlayGame(string core)
 	{
-		var core = SelectedCoreInModal;
-		
-		if (core == "No selected" || core == "Select Core" || string.IsNullOrEmpty(core))
-		{
-			toastService.ShowWarning("You must select a core before!");
-
-			return;
-		}
-
 		await ModalInstance.Close(ModalResult.Ok<string>(string.Empty));
 
 		StateHasChanged();

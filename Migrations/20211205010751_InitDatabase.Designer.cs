@@ -8,7 +8,7 @@ using RetroClient.Data;
 namespace RetroClient.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20211130221311_InitDatabase")]
+    [Migration("20211205010751_InitDatabase")]
     partial class InitDatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,9 @@ namespace RetroClient.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("GamesPath")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("GamesTempPath")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("RetroArchCorePath")

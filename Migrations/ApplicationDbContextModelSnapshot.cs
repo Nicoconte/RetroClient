@@ -23,6 +23,9 @@ namespace RetroClient.Migrations
                     b.Property<string>("GamesPath")
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("GamesTempPath")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("RetroArchCorePath")
                         .HasColumnType("TEXT");
 

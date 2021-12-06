@@ -13,6 +13,8 @@ namespace RetroClient.Models
 		public string Id { get; set; }
 
 		public string GamesPath { get; set; }
+
+		public string GamesTempPath { get; set; }
 		
 		public string RetroArchPath { get; set; }
 		

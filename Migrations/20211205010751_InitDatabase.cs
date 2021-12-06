@@ -12,6 +12,7 @@ namespace RetroClient.Migrations
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     GamesPath = table.Column<string>(type: "TEXT", nullable: true),
+                    GamesTempPath = table.Column<string>(type: "TEXT", nullable: true),
                     RetroArchPath = table.Column<string>(type: "TEXT", nullable: true),
                     RetroArchCorePath = table.Column<string>(type: "TEXT", nullable: true)
                 },

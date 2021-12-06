@@ -1,10 +1,36 @@
-﻿.retroarch-core-modal-table::-webkit-scrollbar {
-	display:none;
+﻿
+.retroarch-core-modal-tr {
+	cursor: pointer;
+	transition: 0.3s;
 }
 
-.retroarch-core-modal-table input {
-	background-image: none !important;
-	outline: none !important;
-	-webkit-box-shadow: none !important;
-	box-shadow: none !important;
+.retroarch-core-modal-tr:hover{
+	background:rgba(156, 154, 154, 0.8);
+	color:white;
+}
+
+
+.retroarch-core-modal-table {
+	overflow: scroll;
+	overflow-x: hidden;
+}
+
+.retroarch-core-modal-table::-webkit-scrollbar-track
+{
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+  border-radius: 10px;
+  background-color: #F5F5F5;
+}
+
+.retroarch-core-modal-table::-webkit-scrollbar
+{
+  width: 12px;
+  background-color: #F5F5F5;
+}
+
+.retroarch-core-modal-table::-webkit-scrollbar-thumb
+{
+  border-radius: 10px;
+  -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+  background-color: #555;
 }
