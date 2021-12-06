@@ -88,6 +88,11 @@ namespace RetroClient.Helpers
             }
         }
 
+        public static bool IsExecuting()
+        {
+            return Process.GetProcessesByName("retroarch").FirstOrDefault() != null;
+        }
+
         public static async Task ProcessListener(Action onCloseCallback = null)
         {
 
@@ -97,7 +102,7 @@ namespace RetroClient.Helpers
                 bool isRunning = true;
 
                 Process retroArchProcess = null;
-
+                
                 //Listen for a retroarch instance
                 while (retroArchProcess == null)
                 {
@@ -105,7 +110,7 @@ namespace RetroClient.Helpers
                     await Task.Delay(1000);
                 }
 
-                Console.WriteLine("Proceso " + retroArchProcess.ProcessName);
+                Console.WriteLine("Se busco el proceso " + retroArchProcess.ProcessName);
 
 
                 // We hook to the process.

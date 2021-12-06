@@ -5,8 +5,6 @@
 
 @inject ILocalStorageService localStorage
 
-
-
 <div class="page">
 
     <NavMenu OnDescriptionChangeCallback="GetViewDescription" />
@@ -16,10 +14,8 @@
             <div class="upper-bar-text">
                 <span>@ViewDescription</span>
             </div>
-            <div class="upper-help-button">
-                <button class='btn'>
-                    <i class='fa fa-question-circle'></i>
-                </button>
+            <div class="upper-user-state">
+                <UserState />
             </div>
         </div>
         <div class="main-content">
@@ -38,15 +34,14 @@
     protected async override void OnInitialized()
     {
         ViewDescription = await localStorage.GetItemAsync<string>("view-description");
-        
+
         //TODO: StateHasChanged freeze thread???
         //In case we have a value for view description we ask to component to re render and show the value
         if (!string.IsNullOrEmpty(ViewDescription))
         {
-            Console.WriteLine("Is rendering? " + ViewDescription);            
+            Console.WriteLine("Is rendering? " + ViewDescription);
             StateHasChanged();
         }
-
     }
 
     public async void GetViewDescription(string description)
@@ -54,4 +49,5 @@
         ViewDescription = description;
         await localStorage.SetItemAsync<string>("view-description", description);
     }
+
 }

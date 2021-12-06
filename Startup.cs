@@ -17,6 +17,7 @@ using Microsoft.Extensions.Hosting;
 using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using RetroClient.Services;
 
 namespace RetroClient
 {
@@ -70,6 +71,8 @@ namespace RetroClient
 			services.AddDbContext<ApplicationDbContext>(options => {
 				options.UseSqlite("Data source=RetroClientDB.db");
 			});
+
+			services.AddSingleton<AppService>();
 
 			services.AddRazorPages();
 			services.AddServerSideBlazor();

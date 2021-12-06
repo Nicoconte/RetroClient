@@ -1,0 +1,45 @@
+﻿@implements IDisposable
+
+@using RetroClient.Services
+
+@inject AppService appService
+
+<div class="user-state-container">
+    @if (IsUserPlaying)
+    {
+        <button class='btn' title="You are playing @GameName">
+            <i class='fa fa-user-circle-o' style="color:rgba(22, 173, 115, 0.5);"></i>
+        </button>
+    }
+    else
+    {
+        <button class='btn' title="No game here">
+            <i class='fa fa-user-circle-o' style="color:rgba(126, 11, 11, 0.5);"></i>
+        </button>
+    }
+</div>
+
+@code {
+
+    public bool IsUserPlaying { get; set; } = false;
+    public string GameName { get; set; } = string.Empty;
+
+    protected async override void OnInitialized()
+    {
+        appService.OnUserPlayStateChange += HandleUserState;
+    }
+
+    public void Dispose()
+    {
+        appService.OnUserPlayStateChange -= HandleUserState;
+    }
+
+    public void HandleUserState()
+    {
+        IsUserPlaying = appService.IsUserPlaying;
+        GameName = appService.ActiveGameName;
+
+        InvokeAsync(StateHasChanged);
+    }
+
+}

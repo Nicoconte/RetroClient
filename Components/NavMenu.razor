@@ -1,4 +1,8 @@
-﻿<div class="@SidebarCssClass">
+﻿@using RetroClient.Services;
+
+@inject IToastService toastService;
+
+<div class="@SidebarCssClass">
     <div class="sidebar-burguer-button-container">
         <button @onclick="ToggleSidebar" class='btn btn-lg'>
             <i class='fa fa-bars'></i>
@@ -42,14 +46,24 @@
 			</div>
 		</a>
 
-		<a href='/games' class="btn sidebar-button-container">
+		<a href='/' class="btn sidebar-button-container">
 			<div class="@SidebarIconCssClass">
-				<i class='fa fa-gavel'></i>
+				<i class='fa fa-question'></i>
 			</div>
 			<div class="@SidebarTextCssClass">
-				<span>Legal</span>
+				<span>Help</span>
 			</div>
 		</a>
+
+		<button @onclick="() => ExitApplication()" class="btn sidebar-button-container">
+			<div class="@SidebarIconCssClass">
+				<i class='fa fa-times text-danger'></i>
+			</div>
+			<div class="@SidebarTextCssClass">
+				<span>Exit</span>
+			</div>
+		</button>
+
 	</div>   
     <div class="sidebar-bottom-text">
         <span class='sidebar-bottom-text text-center mb-1'>
@@ -74,9 +88,14 @@
 		ChangeSidebarClass();
 	}
 
+	public void ExitApplication()
+	{
+		AppService.Close();
+	}
+
 	public async void SendDescription(string description)
 	{
-		OnDescriptionChangeCallback.InvokeAsync(description);
+		await OnDescriptionChangeCallback.InvokeAsync(description);
 	}
 
 	public void ChangeSidebarClass()

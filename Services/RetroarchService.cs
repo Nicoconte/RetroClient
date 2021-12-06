@@ -61,7 +61,6 @@ namespace RetroClient.Services
             });
 
             retroStartGameThread.Start();
-
         }
 
         public static async void StartRetroArch(Setting setting)

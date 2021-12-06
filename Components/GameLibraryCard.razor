@@ -1,19 +1,19 @@
 ﻿@using System.Net;
-@using System.ComponentModel;
-@using System.Diagnostics;
 @using System.IO;
-@using System.Threading;
-@using Microsoft.JSInterop;
 
 @using RetroClient.Models;
 @using RetroClient.Services;
 @using RetroClient.Data;
 @using RetroClient.Helpers;
 
+@using Blazored.LocalStorage;
+
+@inject AppService appService;
 @inject IToastService toastService;
 @inject ApplicationDbContext context;
+@inject ILocalStorageService localStorage;
 
-<div class="col-lg-4 col-md-4 col-sm-6" title="@Game.Name">
+<div class="col-lg-4 col-md-4 col-sm-6" id="game-@Game.Id" title="@Game.Name">
 	<div class="card mt-5 game-card-container" style="width: 20rem; height:28rem;margin-left:20px;">
 		<div class="card-body">
 			<div class="game-card-image">
@@ -42,11 +42,8 @@
 			</div>
 		</div>
 		<div class="card-footer d-flex flex-row">
-			<span class="ml-2 w-25" style="font-size:15px;">
-				<i class="fa fa-circle @GameStateClass"></i>
-			</span>
-			<span class="ml-2 w-75" style="font-size:15px;">
-				<a href="@Game.SourceUrl" class="" style="margin-left:90px;" target="_blank">Go to source</a>
+			<span class="w-100" style="font-size:15px;">
+				<a href="@Game.SourceUrl" class="ml-2" target="_blank">Go to source</a>
 			</span>
 		</div>
 	</div>
@@ -70,12 +67,6 @@
 	[Inject]
 	[CascadingParameter]
 	public IModalService Modal { get; set; }
-
-	public string GameStateClass { get; set; } = "text-danger";
-
-	public string ProgressBarId { get; set; } = $"game-card-bar-{Guid.NewGuid().ToString()}";
-
-	private WebClient _client = new WebClient();
 
 	private VideoGameService _gameService { get; set; }
 	private SettingService _settingService { get; set; }
@@ -113,23 +104,10 @@
 
 		modal.Close();
 
-		Console.WriteLine("Resultado : " + result?.Data?.ToString());
-
 		if (!result.Cancelled || !string.IsNullOrEmpty(result?.Data?.ToString()))
-		{
-			GameStateClass = "text-success";
+		{			
 			toastService.ShowInfo($"Starting {CurrentGameName}");
-
-			await RetroArchHelper.ProcessListener(() =>
-			{
-				Console.WriteLine("I'm the callback dude");
-
-				toastService.ShowSuccess($"{CurrentGameName} stopped!. I hope you enjoy it :)");
-
-				GameStateClass = "text-danger";
-
-				InvokeAsync(StateHasChanged);
-			});
+			appService.SetUserPlayState(true, CurrentGameName);
 		}
 	}
 

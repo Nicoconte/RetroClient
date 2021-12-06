@@ -2,16 +2,18 @@
 @using RetroClient.Data;
 @using RetroClient.Services;
 
+@using RetroClient.Helpers;
+
 @using System.IO;
 
-
+@inject AppService appService
 @inject IToastService toastService;
 @inject ApplicationDbContext context;
 
 <div class="simple-form" style="width:690px;height:430px;">
 
 	<div class="retroarch-core-modal-table w-100" style="height:100%;">
-		
+
 		<div class="w-100 d-flex justify-content-start align-items-center">
 			<h4>Click in a core and start playing!</h4>
 		</div>
@@ -65,6 +67,10 @@
 			return;
 		}
 
+		await RetroArchHelper.ProcessListener(() =>
+		{
+			appService.SetUserPlayState(false, VideoGame.Name);
+		});
 	}
 
 }
