@@ -7,13 +7,16 @@
 <div class="user-state-container">
     @if (IsUserPlaying)
     {
+        <div class="w-75 d-flex justify-content-end align-items-center">
+            <span style="font-weight:600;">You're playing @GameName </span>        
+        </div>
         <button class='btn' title="You are playing @GameName">
             <i class='fa fa-user-circle-o' style="color:rgba(22, 173, 115, 0.5);"></i>
         </button>
     }
     else
     {
-        <button class='btn' title="No game here">
+        <button class='btn' title="Nope">
             <i class='fa fa-user-circle-o' style="color:rgba(126, 11, 11, 0.5);"></i>
         </button>
     }
@@ -37,7 +40,7 @@
     public void HandleUserState()
     {
         IsUserPlaying = appService.IsUserPlaying;
-        GameName = appService.ActiveGameName;
+        GameName = appService.ActiveGameName.Length > 20 ? $"{appService.ActiveGameName.Substring(0, 20)}..." : appService.ActiveGameName;
 
         InvokeAsync(StateHasChanged);
     }
