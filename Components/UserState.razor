@@ -2,7 +2,7 @@
 
 @using RetroClient.Services
 
-@inject AppService appService
+@inject UserService userService;
 
 <div class="user-state-container">
     @if (IsUserPlaying)
@@ -26,21 +26,20 @@
 
     public bool IsUserPlaying { get; set; } = false;
     public string GameName { get; set; } = string.Empty;
-
     protected async override void OnInitialized()
     {
-        appService.OnUserPlayStateChange += HandleUserState;
+        userService.OnUserPlayStateChange += HandleUserState;
     }
 
     public void Dispose()
     {
-        appService.OnUserPlayStateChange -= HandleUserState;
+        userService.OnUserPlayStateChange -= HandleUserState;
     }
 
     public void HandleUserState()
     {
-        IsUserPlaying = appService.IsUserPlaying;
-        GameName = appService.ActiveGameName.Length > 20 ? $"{appService.ActiveGameName.Substring(0, 20)}..." : appService.ActiveGameName;
+        IsUserPlaying = userService.IsUserPlaying;
+        GameName = userService.ActiveGameName.Length > 20 ? $"{userService.ActiveGameName.Substring(0, 20)}..." : userService.ActiveGameName;
 
         InvokeAsync(StateHasChanged);
     }

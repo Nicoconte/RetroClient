@@ -6,7 +6,7 @@
 
 @using System.IO;
 
-@inject AppService appService
+@inject UserService userService;
 @inject IToastService toastService;
 @inject ApplicationDbContext context;
 
@@ -46,7 +46,7 @@
 	[Parameter]
 	public VideoGame VideoGame { get; set; }
 
-	List<string> Cores { get; set; }
+	public List<string> Cores { get; set; }
 
 	protected override void OnInitialized()
 	{
@@ -69,7 +69,7 @@
 
 		await RetroArchHelper.ProcessListener(() =>
 		{
-			appService.SetUserPlayState(false, VideoGame.Name);
+			userService.SetUserPlayState(false, VideoGame.Name);
 		});
 	}
 

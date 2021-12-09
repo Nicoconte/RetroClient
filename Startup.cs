@@ -72,7 +72,8 @@ namespace RetroClient
 				options.UseSqlite("Data source=RetroClientDB.db");
 			});
 
-			services.AddSingleton<AppService>();
+
+			services.AddSingleton<UserService>();
 
 			services.AddRazorPages();
 			services.AddServerSideBlazor();

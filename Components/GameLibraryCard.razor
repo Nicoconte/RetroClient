@@ -8,7 +8,7 @@
 
 @using Blazored.LocalStorage;
 
-@inject AppService appService;
+@inject UserService userService;
 @inject IToastService toastService;
 @inject ApplicationDbContext context;
 @inject ILocalStorageService localStorage;
@@ -70,7 +70,6 @@
 
 	private VideoGameService _gameService { get; set; }
 	private SettingService _settingService { get; set; }
-
 	private Setting _setting { get; set; }
 
 	protected async override void OnInitialized()
@@ -107,7 +106,7 @@
 		if (!result.Cancelled || !string.IsNullOrEmpty(result?.Data?.ToString()))
 		{			
 			toastService.ShowInfo($"Starting {CurrentGameName}");
-			appService.SetUserPlayState(true, CurrentGameName);
+			userService.SetUserPlayState(true, CurrentGameName);
 		}
 	}
 
