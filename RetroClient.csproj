@@ -2,7 +2,6 @@
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
 	<RuntimeIdentifier>win-x64</RuntimeIdentifier>	  
-	<PublishSingleFile>true</PublishSingleFile>	  
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Blazored.LocalStorage" Version="4.1.5" />
